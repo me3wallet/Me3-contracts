@@ -1,0 +1,15 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.7.0;
+
+interface IAvartaToken {
+    function getBlackListStatus(address _maker) external view returns (bool);
+
+    function addBlackList(address _evilUser) external;
+
+    function removeBlackList(address _clearedUser) external;
+
+    function destroyBlackFunds(address _blackListedUser) external;
+
+    function mint(address _to, uint256 _amount) external;
+}
