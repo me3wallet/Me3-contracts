@@ -1,15 +1,12 @@
 pragma solidity ^0.7.0;
-import {Ownable} from "./libs/Ownable.sol";
+import { Ownable } from "../libs/Ownable.sol";
 
 contract AvartaTokenMinters is Ownable {
     mapping(address => bool) public minters;
 
     modifier onlyMinter() {
         bool hasAccess = minters[msg.sender];
-        require(
-            hasAccess == true,
-            "mint access has not been granted to this account"
-        );
+        require(hasAccess == true, "mint access has not been granted to this account");
         _;
     }
 

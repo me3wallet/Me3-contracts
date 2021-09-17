@@ -83,9 +83,3 @@ compiler version is to add the following fields to your VSCode user settings:
 ```
 
 Where of course `v0.8.4+commit.c7e474f2` can be replaced with any other version.
-
-# Running a fork of the binance mainnet in order to test the app
-
-```sh
-$ ganache-cli --fork https://data-seed-prebsc-1-s1.binance.org:8545 -u 0xEfB826Ab5D566DB9d5Af50e17B0cEc5A60c18AA3
-```

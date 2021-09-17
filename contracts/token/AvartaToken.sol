@@ -2,9 +2,9 @@
 
 pragma solidity ^0.7.0;
 import { AvartaTokenMinters } from "./AvartaTokenMinters.sol";
-import { Ownable } from "./libs/Ownable.sol";
-import { IERC20 } from "./libs/IERC20.sol";
-import { SafeMath } from "./libs/SafeMath.sol";
+import { Ownable } from "../libs/Ownable.sol";
+import { IERC20 } from "../libs/IERC20.sol";
+import { SafeMath } from "../libs/SafeMath.sol";
 
 contract AvartaToken is IERC20, Ownable, AvartaTokenMinters {
     using SafeMath for uint256;
