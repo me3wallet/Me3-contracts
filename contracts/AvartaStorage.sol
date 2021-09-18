@@ -10,6 +10,7 @@ import { IAvartaStorageSchema } from "./interface/IAvartaStorageSchema.sol";
  */
 
 contract AvartaStorage is IAvartaStorageSchema, AvartaStorageOwners {
+    using SafeMath for uint256;
     uint256 public DepositRecordId;
 
     FixedDepositRecord[] public fixedDepositRecords;
@@ -18,6 +19,9 @@ contract AvartaStorage is IAvartaStorageSchema, AvartaStorageOwners {
 
     //depositor address to depositor cycle mapping
     mapping(address => mapping(uint256 => FixedDepositRecord)) public DepositRecordToDepositorMapping;
+
+    //  This maps the depositor to the record index and then to the record ID
+    mapping(address => mapping(uint256 => uint256)) DepositorToRecordIndexToRecordIDMapping;
 
     //  This tracks the number of records by index created by a depositor
     mapping(address => uint256) public DepositorToDepositorRecordIndexMapping;
@@ -28,11 +32,10 @@ contract AvartaStorage is IAvartaStorageSchema, AvartaStorageOwners {
 
     function createDepositRecordMapping(
         uint256 amount,
-        uint256 totalAmount,
-        uint256 derivativeBalance,
         uint256 lockPeriodInSeconds,
         uint256 depositDateInSeconds,
         address payable depositor,
+        uint256 rewardAmountRecieved,
         bool hasWithdrawn
     ) external onlyStorageOracle returns (uint256) {
         DepositRecordId += 1;
@@ -45,8 +48,7 @@ contract AvartaStorage is IAvartaStorageSchema, AvartaStorageOwners {
         _fixedDeposit.depositDateInSeconds = depositDateInSeconds;
         _fixedDeposit.hasWithdrawn = hasWithdrawn;
         _fixedDeposit.depositorId = depositor;
-        _fixedDeposit.totalAmountDeposited = totalAmount;
-        _fixedDeposit.derivativeBalance = derivativeBalance;
+        _fixedDeposit.rewardAmountRecieved = rewardAmountRecieved;
 
         fixedDepositRecords.push(_fixedDeposit);
 
@@ -56,11 +58,10 @@ contract AvartaStorage is IAvartaStorageSchema, AvartaStorageOwners {
     function updateDepositRecordMapping(
         uint256 depositRecordId,
         uint256 amount,
-        uint256 totalAmount,
-        uint256 derivativeBalance,
         uint256 lockPeriodInSeconds,
         uint256 depositDateInSeconds,
         address payable depositor,
+        uint256 rewardAmountRecieved,
         bool hasWithdrawn
     ) external onlyStorageOracle {
         FixedDepositRecord storage _fixedDeposit = DepositRecordMapping[depositRecordId];
@@ -71,8 +72,8 @@ contract AvartaStorage is IAvartaStorageSchema, AvartaStorageOwners {
         _fixedDeposit.depositDateInSeconds = depositDateInSeconds;
         _fixedDeposit.hasWithdrawn = hasWithdrawn;
         _fixedDeposit.depositorId = depositor;
-        _fixedDeposit.totalAmountDeposited = totalAmount;
-        _fixedDeposit.derivativeBalance = derivativeBalance;
+        _fixedDeposit.rewardAmountRecieved = rewardAmountRecieved;
+
         //fixedDepositRecords.push(_fixedDeposit);
     }
 
@@ -87,10 +88,9 @@ contract AvartaStorage is IAvartaStorageSchema, AvartaStorageOwners {
             uint256 recordId,
             address payable depositorId,
             uint256 amount,
-            uint256 totalAmount,
-            uint256 derivativeBalance,
             uint256 depositDateInSeconds,
             uint256 lockPeriodInSeconds,
+            uint256 rewardAmountRecieved,
             bool hasWithdrawn
         )
     {
@@ -100,10 +100,9 @@ contract AvartaStorage is IAvartaStorageSchema, AvartaStorageOwners {
             records.recordId,
             records.depositorId,
             records.amountDeposited,
-            records.totalAmountDeposited,
-            records.derivativeBalance,
             records.depositDateInSeconds,
             records.lockPeriodInSeconds,
+            records.rewardAmountRecieved,
             records.hasWithdrawn
         );
     }
@@ -116,21 +115,26 @@ contract AvartaStorage is IAvartaStorageSchema, AvartaStorageOwners {
         address payable depositor,
         uint256 recordId,
         uint256 amountDeposited,
-        uint256 totalAmountDeposited,
-        uint256 derivativeBalance,
         uint256 lockPeriodInSeconds,
         uint256 depositDateInSeconds,
+        uint256 rewardAmountRecieved,
         bool hasWithdrawn
     ) external onlyStorageOracle {
         mapping(uint256 => FixedDepositRecord) storage depositorAddressMapping = DepositRecordToDepositorMapping[depositor];
-
         depositorAddressMapping[recordId].recordId = recordId;
         depositorAddressMapping[recordId].depositorId = depositor;
         depositorAddressMapping[recordId].amountDeposited = amountDeposited;
-        depositorAddressMapping[recordId].totalAmountDeposited = totalAmountDeposited;
         depositorAddressMapping[recordId].depositDateInSeconds = depositDateInSeconds;
         depositorAddressMapping[recordId].lockPeriodInSeconds = lockPeriodInSeconds;
+        depositorAddressMapping[recordId].rewardAmountRecieved = rewardAmountRecieved;
         depositorAddressMapping[recordId].hasWithdrawn = hasWithdrawn;
-        depositorAddressMapping[recordId].derivativeBalance = derivativeBalance;
+    }
+
+    function createDepositorToDepositRecordIndexToRecordIDMapping(address payable depositor, uint256 recordId) external onlyStorageOracle {
+        DepositorToDepositorRecordIndexMapping[depositor] = DepositorToDepositorRecordIndexMapping[depositor].add(1);
+
+        uint256 DepositorCreatedRecordIndex = DepositorToDepositorRecordIndexMapping[depositor];
+        mapping(uint256 => uint256) storage depositorCreatedRecordIndexToRecordId = DepositorToRecordIndexToRecordIDMapping[depositor];
+        depositorCreatedRecordIndexToRecordId[DepositorCreatedRecordIndex] = recordId;
     }
 }

@@ -10,7 +10,6 @@ interface IAvartaStorageSchema {
         uint256 amountDeposited;
         uint256 depositDateInSeconds;
         uint256 lockPeriodInSeconds;
-        uint256 derivativeBalance;
-        uint256 totalAmountDeposited;
+        uint256 rewardAmountRecieved;
     }
 }
