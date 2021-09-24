@@ -14,19 +14,22 @@ contract AvartaFarm is Ownable, IAvartaStorageSchema {
     IAvartaStorage public avartaStorage;
     IAvartaToken public avartaToken;
 
-    uint256 private APY_VALUE = 10;
+    uint256 internal APY_VALUE_PERHOUR = 100000; //0.001%
     uint256 public totalFarmValue;
     uint256 private REFRESH_RATE = 1 * 60 * 60; // 1 hour
     uint256 private MAX_STAKING_POOL_SIZE_PERCENT = 10;
     uint256 public MAX_STAKING_POOL_SIZE;
-    uint256 private PRECISION_VALUE = 100;
+    uint256 private PRECISION_VALUE = 100 * (10**9);
+    uint256 private YEAR_SECONDS = 365 * 24 * 60 * 60;
     uint256 public LOCK_PERIOD = 30 * 60; // 30 minutes
+
+    uint256 internal RewardPercentPerRefreshRate;
 
     event Stake(address indexed depositor, uint256 indexed amount, uint256 indexed recordId);
     event Withdraw(address indexed owner, uint256 indexed amount, uint256 indexed recordId);
 
     function getApyValue() public view returns (uint256) {
-        return APY_VALUE;
+        return APY_VALUE_PERHOUR;
     }
 
     function getRefreshRate() public view returns (uint256) {
@@ -76,7 +79,7 @@ contract AvartaFarm is Ownable, IAvartaStorageSchema {
     }
 
     function updateApyValue(uint256 _apyValue) public onlyOwner {
-        APY_VALUE = _apyValue;
+        APY_VALUE_PERHOUR = _apyValue;
     }
 
     function updateRefreshRate(uint256 _refreshRate) public onlyOwner {
@@ -148,20 +151,20 @@ contract AvartaFarm is Ownable, IAvartaStorageSchema {
 
         avartaToken.transfer(recepient, derivativeAmount);
         // pending when i write the calculateReward function
-        uint256 rewardAmount = 10;
+        uint256 rewardAmount = calculateReward(recordId);
 
         avartaStorage.updateDepositRecordMapping(recordId, derivativeAmount, lockPeriod, depositDate, recepient, rewardAmount, true);
 
         emit Withdraw(recepient, derivativeAmount, recordId);
     }
 
-    function _validateLockPeriod(uint256 lockPeriod) internal returns (bool) {
+    function _validateLockPeriod(uint256 lockPeriod) internal view returns (bool) {
         require(lockPeriod > 0, "Lock period must be greater than 0");
         require(lockPeriod <= LOCK_PERIOD, "Lock period must be less than or equal to 30 minutes");
         return true;
     }
 
-    function _validateLockTimeHasElapsedAndHasNotWithdrawn(uint256 recordId) internal {
+    function _validateLockTimeHasElapsedAndHasNotWithdrawn(uint256 recordId) internal view returns (bool) {
         FixedDepositRecord memory depositRecord = _getFixedDepositRecordById(recordId);
 
         uint256 maturityDate = depositRecord.lockPeriodInSeconds;
@@ -173,6 +176,8 @@ contract AvartaFarm is Ownable, IAvartaStorageSchema {
         uint256 currentTimeStamp = block.timestamp;
 
         require(currentTimeStamp >= maturityDate, "Funds are still locked, wait until lock period expires");
+
+        return true;
     }
 
     function _updateRecord(FixedDepositRecord memory record) internal returns (bool) {
@@ -185,5 +190,27 @@ contract AvartaFarm is Ownable, IAvartaStorageSchema {
             record.rewardAmountRecieved,
             record.hasWithdrawn
         );
+    }
+
+    function calculateReward(uint256 recordId) public returns (uint256) {
+        FixedDepositRecord memory record = _getFixedDepositRecordById(recordId);
+
+        uint256 depositDate = record.depositDateInSeconds;
+
+        uint256 depositAmount = record.amountDeposited;
+
+        uint256 duration = block.timestamp.sub(depositDate);
+
+        uint256 APR = calculateAprForDuration(duration);
+
+        uint256 rewardAmount = (APR.mul(depositAmount)).div(APY_VALUE_PERHOUR);
+
+        return rewardAmount;
+    }
+
+    function calculateAprForDuration(uint256 duration) public view returns (uint256) {
+        uint256 APR = duration / 1 hours;
+
+        return APR;
     }
 }
