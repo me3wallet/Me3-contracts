@@ -28,6 +28,11 @@ contract AvartaFarm is Ownable, IAvartaStorageSchema {
     event Stake(address indexed depositor, uint256 indexed amount, uint256 indexed recordId);
     event Withdraw(address indexed owner, uint256 indexed amount, uint256 indexed recordId);
 
+    constructor(address storageAddress, address tokenAddress) {
+        avartaStorage = IAvartaStorage(storageAddress);
+        avartaToken = IAvartaToken(tokenAddress);
+    }
+
     function getApyValue() public view returns (uint256) {
         return APY_VALUE_PERHOUR;
     }
