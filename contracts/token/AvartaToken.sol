@@ -26,7 +26,7 @@ contract AvartaToken is IERC20, Ownable, AvartaTokenMinters {
     /// @notice A checkpoint for marking number of votes from a given block
     struct Checkpoint {
         uint32 fromBlock;
-        uint96 votes;
+        uint256 votes;
     }
 
     /// @notice A record of votes checkpoints for each account, by index
@@ -50,7 +50,7 @@ contract AvartaToken is IERC20, Ownable, AvartaTokenMinters {
 
     mapping(address => uint256) private _balances;
 
-    mapping(address => mapping(address => uint256)) private _allowances;
+    mapping(address => mapping(address => uint256)) private _allowance;
 
     uint256 private _totalSupply;
 
@@ -124,58 +124,18 @@ contract AvartaToken is IERC20, Ownable, AvartaTokenMinters {
         return _balances[account];
     }
 
-     /* @notice domainSeparator */
+    /* @notice domainSeparator */
     // solhint-disable func-name-mixedcase
     function DOMAIN_SEPARATOR() public view returns (bytes32) {
-        return
-            keccak256(
-                abi.encode(DOMAIN_TYPEHASH, keccak256(bytes(_name)), getChainId(), address(this))
-            );
-    }
-
-
-    /**
-     * @dev See {IERC20-transfer}.
-     *
-     * Requirements:
-     *
-     * - `recipient` cannot be the zero address.
-     * - the caller must have a balance of at least `amount`.
-     */
-    function transfer(address recipient, uint256 amount) public virtual override returns (bool) {
-        _transfer(_msgSender(), recipient, amount);
-        return true;
+        return keccak256(abi.encode(DOMAIN_TYPEHASH, keccak256(bytes(_name)), getChainId(), address(this)));
     }
 
     /**
      * @dev See {IERC20-allowance}.
      */
     function allowance(address owner, address spender) public view virtual override returns (uint256) {
-        return _allowances[owner][spender];
+        return _allowance[owner][spender];
     }
-
-
-
-    /** @dev Creates `amount` tokens and assigns them to `account`, increasing
-     * the total supply.
-     *
-     * Emits a {Transfer} event with `from` set to the zero address.
-     *
-     * Requirements:
-     *
-     * - `to` cannot be the zero address.
-     */
-    function _mint(address account, uint256 amount) internal virtual {
-        require(account != address(0), "ERC20: mint to the zero address");
-
-        _beforeTokenTransfer(address(0), account, amount);
-
-        _totalSupply = _totalSupply.add(amount);
-        _balances[account] = _balances[account].add(amount);
-        emit Transfer(address(0), account, amount);
-    }
-
-
 
     /**
      * @dev Sets {decimals} to a value other than the default one of 18.
@@ -188,7 +148,7 @@ contract AvartaToken is IERC20, Ownable, AvartaTokenMinters {
         _decimals = decimals_;
     }
 
-     /**
+    /**
      * @notice Approve `spender` to transfer up to `amount` from `src`
      * @dev This will overwrite the approval amount for `spender`
      *  and is subject to issues noted [here](https://eips.ethereum.org/EIPS/eip-20#approve)
@@ -196,7 +156,7 @@ contract AvartaToken is IERC20, Ownable, AvartaTokenMinters {
      * @param rawAmount The number of tokens that are approved (2^256-1 means infinite)
      * @return Whether or not the approval succeeded
      */
-    function approve(address spender, uint256 rawAmount) external returns (bool) {
+    function approve(address spender, uint256 rawAmount) external override returns (bool) {
         _approve(msg.sender, spender, rawAmount);
         return true;
     }
@@ -206,25 +166,16 @@ contract AvartaToken is IERC20, Ownable, AvartaTokenMinters {
         address spender,
         uint256 rawAmount
     ) internal {
-        uint96 amount;
+        uint256 amount;
         if (rawAmount == uint256(-1)) {
-            amount = uint96(-1);
+            amount = uint256(-1);
         } else {
             amount = safe96(rawAmount, "AvartaToken::approve: amount exceeds 96 bits");
         }
 
-        allowances[owner][spender] = amount;
+        _allowance[owner][spender] = amount;
 
         emit Approval(owner, spender, amount);
-    }
-
-    /**
-     * @notice Get the number of tokens held by the `account`
-     * @param account The address of the account to get the balance of
-     * @return The number of tokens held
-     */
-    function balanceOf(address account) external view returns (uint256) {
-        return balances[account];
     }
 
     /**
@@ -233,8 +184,8 @@ contract AvartaToken is IERC20, Ownable, AvartaTokenMinters {
      * @param rawAmount The number of tokens to transfer
      * @return Whether or not the transfer succeeded
      */
-    function transfer(address dst, uint256 rawAmount) external returns (bool) {
-        uint96 amount = safe96(rawAmount, "AvartaToken::transfer: amount exceeds 96 bits");
+    function transfer(address dst, uint256 rawAmount) external override returns (bool) {
+        uint256 amount = safe96(rawAmount, "AvartaToken::transfer: amount exceeds 96 bits");
         _transferTokens(msg.sender, dst, amount);
         return true;
     }
@@ -250,19 +201,14 @@ contract AvartaToken is IERC20, Ownable, AvartaTokenMinters {
         address src,
         address dst,
         uint256 rawAmount
-    ) external returns (bool) {
+    ) external override returns (bool) {
         address spender = msg.sender;
-        uint96 spenderAllowance = allowances[src][spender];
-        uint96 amount = safe96(rawAmount, "AvartaToken::approve: amount exceeds 96 bits");
+        uint256 spenderAllowance = _allowance[src][spender];
+        uint256 amount = safe96(rawAmount, "AvartaToken::approve: amount exceeds 96 bits");
 
-        if (spender != src && spenderAllowance != uint96(-1)) {
-            uint96 newAllowance =
-                sub96(
-                    spenderAllowance,
-                    amount,
-                    "AvartaToken::transferFrom: transfer amount exceeds spender allowance"
-                );
-            allowances[src][spender] = newAllowance;
+        if (spender != src && spenderAllowance != uint256(-1)) {
+            uint256 newAllowance = sub96(spenderAllowance, amount, "AvartaToken::transferFrom: transfer amount exceeds spender allowance");
+            _allowance[src][spender] = newAllowance;
 
             emit Approval(src, spender, newAllowance);
         }
@@ -278,31 +224,22 @@ contract AvartaToken is IERC20, Ownable, AvartaTokenMinters {
      */
     function burnFrom(address account, uint256 rawAmount) public {
         require(account != address(0), "AvartaToken::burnFrom: cannot burn from the zero address");
-        uint96 amount = safe96(rawAmount, "AvartaToken::burnFrom: amount exceeds 96 bits");
+        uint256 amount = safe96(rawAmount, "AvartaToken::burnFrom: amount exceeds 96 bits");
 
         address spender = msg.sender;
-        uint96 spenderAllowance = allowances[account][spender];
-        if (spender != account && spenderAllowance != uint96(-1)) {
-            uint96 newAllowance =
-                sub96(
-                    spenderAllowance,
-                    amount,
-                    "AvartaToken::burnFrom: burn amount exceeds allowance"
-                );
-            allowances[account][spender] = newAllowance;
+        uint256 spenderAllowance = _allowance[account][spender];
+        if (spender != account && spenderAllowance != uint256(-1)) {
+            uint256 newAllowance = sub96(spenderAllowance, amount, "AvartaToken::burnFrom: burn amount exceeds allowance");
+            _allowance[account][spender] = newAllowance;
             emit Approval(account, spender, newAllowance);
         }
 
-        balances[account] = sub96(
-            balances[account],
-            amount,
-            "AvartaToken::burnFrom: burn amount exceeds balance"
-        );
+        _balances[account] = sub96(_balances[account], amount, "AvartaToken::burnFrom: burn amount exceeds balance");
         emit Transfer(account, address(0), amount);
 
         _moveDelegates(delegates[account], address(0), amount);
 
-        totalSupply -= rawAmount;
+        _totalSupply -= rawAmount;
     }
 
     /**
@@ -357,10 +294,7 @@ contract AvartaToken is IERC20, Ownable, AvartaTokenMinters {
         bytes32 r,
         bytes32 s
     ) public {
-        bytes32 structHash =
-            keccak256(
-                abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline)
-            );
+        bytes32 structHash = keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline));
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR(), structHash));
         require(owner == ecrecover(digest, v, r, s), "AvartaToken::permit: invalid signature");
         require(owner != address(0), "AvartaToken::permit: invalid signature");
@@ -373,7 +307,7 @@ contract AvartaToken is IERC20, Ownable, AvartaTokenMinters {
      * @param account The address to get votes balance
      * @return The number of current votes for `account`
      */
-    function getCurrentVotes(address account) external view returns (uint96) {
+    function getCurrentVotes(address account) external view returns (uint256) {
         uint32 nCheckpoints = numCheckpoints[account];
         return nCheckpoints > 0 ? checkpoints[account][nCheckpoints - 1].votes : 0;
     }
@@ -385,7 +319,7 @@ contract AvartaToken is IERC20, Ownable, AvartaTokenMinters {
      * @param blockNumber The block number to get the vote balance at
      * @return The number of votes the account had as of the given block
      */
-    function getPriorVotes(address account, uint256 blockNumber) public view returns (uint96) {
+    function getPriorVotes(address account, uint256 blockNumber) public view returns (uint256) {
         require(blockNumber < block.number, "AvartaToken::getPriorVotes: not yet determined");
 
         uint32 nCheckpoints = numCheckpoints[account];
@@ -421,7 +355,7 @@ contract AvartaToken is IERC20, Ownable, AvartaTokenMinters {
 
     function _delegate(address delegator, address delegatee) internal {
         address currentDelegate = delegates[delegator];
-        uint96 delegatorBalance = balances[delegator];
+        uint256 delegatorBalance = _balances[delegator];
         delegates[delegator] = delegatee;
 
         emit DelegateChanged(delegator, currentDelegate, delegatee);
@@ -432,27 +366,13 @@ contract AvartaToken is IERC20, Ownable, AvartaTokenMinters {
     function _transferTokens(
         address src,
         address dst,
-        uint96 amount
+        uint256 amount
     ) internal {
-        require(
-            src != address(0),
-            "AvartaToken::_transferTokens: cannot transfer from the zero address"
-        );
-        require(
-            dst != address(0),
-            "AvartaToken::_transferTokens: cannot transfer to the zero address"
-        );
+        require(src != address(0), "AvartaToken::_transferTokens: cannot transfer from the zero address");
+        require(dst != address(0), "AvartaToken::_transferTokens: cannot transfer to the zero address");
 
-        balances[src] = sub96(
-            balances[src],
-            amount,
-            "AvartaToken::_transferTokens: transfer amount exceeds balance"
-        );
-        balances[dst] = add96(
-            balances[dst],
-            amount,
-            "AvartaToken::_transferTokens: transfer amount overflows"
-        );
+        _balances[src] = sub96(_balances[src], amount, "AvartaToken::_transferTokens: transfer amount exceeds balance");
+        _balances[dst] = add96(_balances[dst], amount, "AvartaToken::_transferTokens: transfer amount overflows");
         emit Transfer(src, dst, amount);
 
         _moveDelegates(delegates[src], delegates[dst], amount);
@@ -461,22 +381,20 @@ contract AvartaToken is IERC20, Ownable, AvartaTokenMinters {
     function _moveDelegates(
         address srcRep,
         address dstRep,
-        uint96 amount
+        uint256 amount
     ) internal {
         if (srcRep != dstRep && amount > 0) {
             if (srcRep != address(0)) {
                 uint32 srcRepNum = numCheckpoints[srcRep];
-                uint96 srcRepOld = srcRepNum > 0 ? checkpoints[srcRep][srcRepNum - 1].votes : 0;
-                uint96 srcRepNew =
-                    sub96(srcRepOld, amount, "AvartaToken::_moveVotes: vote amount underflows");
+                uint256 srcRepOld = srcRepNum > 0 ? checkpoints[srcRep][srcRepNum - 1].votes : 0;
+                uint256 srcRepNew = sub96(srcRepOld, amount, "AvartaToken::_moveVotes: vote amount underflows");
                 _writeCheckpoint(srcRep, srcRepNum, srcRepOld, srcRepNew);
             }
 
             if (dstRep != address(0)) {
                 uint32 dstRepNum = numCheckpoints[dstRep];
-                uint96 dstRepOld = dstRepNum > 0 ? checkpoints[dstRep][dstRepNum - 1].votes : 0;
-                uint96 dstRepNew =
-                    add96(dstRepOld, amount, "AvartaToken::_moveVotes: vote amount overflows");
+                uint256 dstRepOld = dstRepNum > 0 ? checkpoints[dstRep][dstRepNum - 1].votes : 0;
+                uint256 dstRepNew = add96(dstRepOld, amount, "AvartaToken::_moveVotes: vote amount overflows");
                 _writeCheckpoint(dstRep, dstRepNum, dstRepOld, dstRepNew);
             }
         }
@@ -485,11 +403,10 @@ contract AvartaToken is IERC20, Ownable, AvartaTokenMinters {
     function _writeCheckpoint(
         address delegatee,
         uint32 nCheckpoints,
-        uint96 oldVotes,
-        uint96 newVotes
+        uint256 oldVotes,
+        uint256 newVotes
     ) internal {
-        uint32 blockNumber =
-            safe32(block.number, "AvartaToken::_writeCheckpoint: block number exceeds 32 bits");
+        uint32 blockNumber = safe32(block.number, "AvartaToken::_writeCheckpoint: block number exceeds 32 bits");
 
         if (nCheckpoints > 0 && checkpoints[delegatee][nCheckpoints - 1].fromBlock == blockNumber) {
             checkpoints[delegatee][nCheckpoints - 1].votes = newVotes;
@@ -506,26 +423,26 @@ contract AvartaToken is IERC20, Ownable, AvartaTokenMinters {
         return uint32(n);
     }
 
-    function safe96(uint256 n, string memory errorMessage) internal pure returns (uint96) {
+    function safe96(uint256 n, string memory errorMessage) internal pure returns (uint256) {
         require(n < 2**96, errorMessage);
-        return uint96(n);
+        return uint256(n);
     }
 
     function add96(
-        uint96 a,
-        uint96 b,
+        uint256 a,
+        uint256 b,
         string memory errorMessage
-    ) internal pure returns (uint96) {
-        uint96 c = a + b;
+    ) internal pure returns (uint256) {
+        uint256 c = a + b;
         require(c >= a, errorMessage);
         return c;
     }
 
     function sub96(
-        uint96 a,
-        uint96 b,
+        uint256 a,
+        uint256 b,
         string memory errorMessage
-    ) internal pure returns (uint96) {
+    ) internal pure returns (uint256) {
         require(b <= a, errorMessage);
         return a - b;
     }
@@ -538,7 +455,7 @@ contract AvartaToken is IERC20, Ownable, AvartaTokenMinters {
         }
         return chainId;
     }
-}
+
     function getBlackListStatus(address _maker) external view returns (bool) {
         return isBlackListed[_maker];
     }
@@ -560,6 +477,31 @@ contract AvartaToken is IERC20, Ownable, AvartaTokenMinters {
         _totalSupply -= dirtyFunds;
         emit DestroyedBlackFunds(_blackListedUser, dirtyFunds);
     }
+
+    /** @dev Creates `amount` tokens and assigns them to `account`, increasing
+     * the total supply.
+     *
+     * Emits a {Transfer} event with `from` set to the zero address.
+     *
+     * Requirements
+     *
+     * - `to` cannot be the zero address.
+     */
+    function _mint(address account, uint256 amount) internal virtual {
+        require(account != address(0), "ERC20: mint to the zero address");
+
+        _beforeTokenTransfer(address(0), account, amount);
+
+        _totalSupply = _totalSupply.add(amount);
+        _balances[account] = _balances[account] + amount;
+        emit Transfer(address(0), account, amount);
+    }
+
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal virtual {}
 
     function mint(address _to, uint256 _amount) public onlyMinter returns (bool) {
         _mint(_to, _amount);

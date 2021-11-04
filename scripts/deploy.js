@@ -2,7 +2,7 @@ const hre = require("hardhat");
 const { ethers } = hre;
 
 async function main() {
-  const admin = await ethers.getSigner();
+  const admin = "0xc2C320Eadf2D45bf5acE2f78271385878F7737ae";
 
   const AvartaToken = await ethers.getContractFactory("AvartaToken");
   const avartaToken = await AvartaToken.deploy("Avarta Token", "AVT", "1000000000000000000000000000");
@@ -10,7 +10,7 @@ async function main() {
   console.log(`avartaToken  Deployed: ${avartaToken.address}`);
 
   const TimeLock = await ethers.getContractFactory("Timelock");
-  const timeLock = await TimeLock.deploy(admin, "3 days");
+  const timeLock = await TimeLock.deploy(admin, "259200");
   await timeLock.deployed();
   console.log(`timeLock  Deployed: ${timeLock.address}`);
 
@@ -36,11 +36,11 @@ async function main() {
     });
     await hre.run("verify:verify", {
       address: timeLock.address,
-      constructorArguments: [admin.address, "3 days"],
+      constructorArguments: [admin, "259200"],
     });
     await hre.run("verify:verify", {
       address: avartaGovernor.address,
-      constructorArguments: [timeLock.address, avartaToken.address, admin.address],
+      constructorArguments: [timeLock.address, avartaToken.address, admin],
     });
     await hre.run("verify:verify", {
       address: avartaStorage.address,
