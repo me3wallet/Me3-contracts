@@ -83,3 +83,16 @@ compiler version is to add the following fields to your VSCode user settings:
 ```
 
 Where of course `v0.8.4+commit.c7e474f2` can be replaced with any other version.
+
+## Understanding the Avarta Contracts
+
+## Avarta Farm
+
+This is the core protocol for the avarta farming contract.
+
+`stake()`
+
+| **Parameter** | **Type**  | **Description**                                        |
+| ------------- | --------- | ------------------------------------------------------ |
+| `amount`      | _uint256_ | The amount a user wants to stake in the avarta farm    |
+| `lockPeriod`  | _uint256_ | Total amount of time user wants his funds to be locked |
