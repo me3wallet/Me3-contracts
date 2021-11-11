@@ -197,7 +197,7 @@ contract AvartaFarm is Ownable, IAvartaStorageSchema {
         );
     }
 
-    function calculateReward(uint256 recordId) public returns (uint256) {
+    function calculateReward(uint256 recordId) public view returns (uint256) {
         FixedDepositRecord memory record = _getFixedDepositRecordById(recordId);
 
         uint256 depositDate = record.depositDateInSeconds;

@@ -90,9 +90,35 @@ Where of course `v0.8.4+commit.c7e474f2` can be replaced with any other version.
 
 This is the core protocol for the avarta farming contract.
 
-`stake()`
+```js
+stake();
+```
 
 | **Parameter** | **Type**  | **Description**                                        |
 | ------------- | --------- | ------------------------------------------------------ |
 | `amount`      | _uint256_ | The amount a user wants to stake in the avarta farm    |
 | `lockPeriod`  | _uint256_ | Total amount of time user wants his funds to be locked |
+
+```js
+withdraw();
+```
+
+| **Parameter** | **Type**  | **Description**                                                   |
+| ------------- | --------- | ----------------------------------------------------------------- |
+| `amount`      | _uint256_ | The amount of stake a user wants to withdraw from the avarta farm |
+
+```js
+calculateReward();
+```
+
+| **Parameter** | **Type**  | **Description**                                                               |
+| ------------- | --------- | ----------------------------------------------------------------------------- |
+| `recordId`    | _uint256_ | Calculates the reward a particular stake record will recieve in Avarta Tokens |
+
+```js
+calculateAprForDuration();
+```
+
+| **Parameter** | **Type**  | **Description**                                                   |
+| ------------- | --------- | ----------------------------------------------------------------- |
+| `duration`    | _uint256_ | Calculates the Annual percentage result for a particular duration |
