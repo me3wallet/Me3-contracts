@@ -122,3 +122,7 @@ calculateAprForDuration();
 | **Parameter** | **Type**  | **Description**                                                   |
 | ------------- | --------- | ----------------------------------------------------------------- |
 | `duration`    | _uint256_ | Calculates the Annual percentage result for a particular duration |
+
+## Avarta Storage
+
+The avarta storage contract is the DB of the Avarta protocol. It holds the getter and setter methods of the avarta protocol
