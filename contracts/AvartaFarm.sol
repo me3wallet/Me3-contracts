@@ -170,11 +170,12 @@ contract AvartaFarm is Ownable, IAvartaStorageSchema {
 
         _validateLockTimeHasElapsedAndHasNotWithdrawn(recordId);
 
-        avartaToken.transfer(recepient, derivativeAmount);
         // pending when i write the calculateReward function
         uint256 rewardAmount = calculateReward(recordId);
 
         avartaStorage.updateDepositRecordMapping(recordId, derivativeAmount, lockPeriod, depositDate, recepient, rewardAmount, true);
+
+        avartaToken.transfer(recepient, derivativeAmount);
 
         emit Withdraw(recepient, derivativeAmount, recordId);
     }
