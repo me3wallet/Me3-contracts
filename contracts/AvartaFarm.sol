@@ -11,8 +11,8 @@ import { Ownable } from "./libs/Ownable.sol";
 contract AvartaFarm is Ownable, IAvartaStorageSchema {
     using SafeMath for uint256;
 
-    IAvartaStorage public avartaStorage;
-    IAvartaToken public avartaToken;
+    IAvartaStorage public immutable avartaStorage;
+    IAvartaToken public immutable avartaToken;
 
     uint256 internal APY_VALUE_PERHOUR = 100000; //0.001%
     uint256 public totalFarmValue;
