@@ -10,20 +10,29 @@ contract AvartaStorageOwners {
     address owner;
     mapping(address => bool) private storageOracles;
 
+    //// Events Declaration
+    event StorageOracleStatus(address indexed oracle, bool indexed status);
+
     constructor() public {
         owner = msg.sender;
     }
 
     function changeStorageOracleStatus(address oracle, bool status) external onlyOwner {
         storageOracles[oracle] = status;
+
+        emit StorageOracleStatus(oracle, status);
     }
 
     function activateStorageOracle(address oracle) external onlyOwner {
         storageOracles[oracle] = true;
+
+        emit StorageOracleStatus(oracle, true);
     }
 
     function deactivateStorageOracle(address oracle) external onlyOwner {
         storageOracles[oracle] = false;
+
+        emit StorageOracleStatus(oracle, false);
     }
 
     function reAssignStorageOracle(address newOracle) external onlyStorageOracle {

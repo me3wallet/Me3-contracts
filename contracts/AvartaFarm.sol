@@ -25,8 +25,14 @@ contract AvartaFarm is Ownable, IAvartaStorageSchema {
 
     uint256 internal RewardPercentPerRefreshRate;
 
+    //// Events Declaration
     event Stake(address indexed depositor, uint256 indexed amount, uint256 indexed recordId);
     event Withdraw(address indexed owner, uint256 indexed amount, uint256 indexed recordId);
+    event ApyValue(uint256 indexed apy);
+    event RefreshRate(uint256 indexed refreshRate);
+    event MaxStakingPoolSize(uint256 indexed maxStakingPoolSize);
+    event MaxStakingPoolSizePercent(uint256 indexed maxStakingPoolSizePercent);
+    event PrecisionValue(uint256 indexed precisionValue);
 
     constructor(address storageAddress, address tokenAddress) {
         avartaStorage = IAvartaStorage(storageAddress);
@@ -85,23 +91,33 @@ contract AvartaFarm is Ownable, IAvartaStorageSchema {
 
     function updateApyValue(uint256 _apyValue) public onlyOwner {
         APY_VALUE_PERHOUR = _apyValue;
+
+        emit ApyValue(APY_VALUE_PERHOUR);
     }
 
     function updateRefreshRate(uint256 _refreshRate) public onlyOwner {
         REFRESH_RATE = _refreshRate;
+
+        emit RefreshRate(REFRESH_RATE);
     }
 
     function updateMaxStakingPoolSize() public onlyOwner {
         // 10% of the avartaToken total supply
         MAX_STAKING_POOL_SIZE = (avartaToken.totalSupply() * MAX_STAKING_POOL_SIZE_PERCENT) / 100;
+
+        emit MaxStakingPoolSize(MAX_STAKING_POOL_SIZE);
     }
 
     function updateMaxStakingPoolSizePercent(uint256 _maxStakingPoolSizePercent) public onlyOwner {
         MAX_STAKING_POOL_SIZE_PERCENT = _maxStakingPoolSizePercent;
+
+        emit MaxStakingPoolSizePercent(MAX_STAKING_POOL_SIZE_PERCENT);
     }
 
     function updatePrecisionValue(uint256 _precisionValue) public onlyOwner {
         PRECISION_VALUE = _precisionValue;
+
+        emit PrecisionValue(PRECISION_VALUE);
     }
 
     function stake(uint256 amount, uint256 lockPeriod) public returns (bool) {
