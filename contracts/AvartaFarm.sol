@@ -188,7 +188,7 @@ contract AvartaFarm is Ownable, IAvartaStorageSchema {
     function _validateLockTimeHasElapsedAndHasNotWithdrawn(uint256 recordId) internal view returns (bool) {
         FixedDepositRecord memory depositRecord = _getFixedDepositRecordById(recordId);
 
-        uint256 maturityDate = depositRecord.lockPeriodInSeconds;
+        uint256 maturityDate = depositRecord.depositDateInSeconds + depositRecord.lockPeriodInSeconds;
 
         bool hasWithdrawn = depositRecord.hasWithdrawn;
 
