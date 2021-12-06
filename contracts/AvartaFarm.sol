@@ -133,6 +133,8 @@ contract AvartaFarm is Ownable, IAvartaStorageSchema {
         require(totalFarmValue < MAX_STAKING_POOL_SIZE, "The totalFarmValue has reached limit");
         // check that the amount is less than the maximum staking pool size
         require(amount < MAX_STAKING_POOL_SIZE, "Amount is greater than the maximum staking pool size");
+        // check that the totalFarmValue + amount is less than the maximum staking pool size
+        require(totalFarmValue + amount <= MAX_STAKING_POOL_SIZE, "The totalFarmValue + amount has reached limit");
 
         // check allowance for the depositor
         require(avartaToken.allowance(depositor, address(this)) >= amount, "Not enough avarta token allowance");
@@ -175,6 +177,7 @@ contract AvartaFarm is Ownable, IAvartaStorageSchema {
 
         avartaStorage.updateDepositRecordMapping(recordId, derivativeAmount, lockPeriod, depositDate, recepient, rewardAmount, true);
 
+        // execute transfer after storage manipulation
         avartaToken.transfer(recepient, derivativeAmount);
 
         emit Withdraw(recepient, derivativeAmount, recordId);
@@ -189,6 +192,7 @@ contract AvartaFarm is Ownable, IAvartaStorageSchema {
     function _validateLockTimeHasElapsedAndHasNotWithdrawn(uint256 recordId) internal view returns (bool) {
         FixedDepositRecord memory depositRecord = _getFixedDepositRecordById(recordId);
 
+        // calculate maturityDate (funds will be locked until maturityDate)
         uint256 maturityDate = depositRecord.depositDateInSeconds + depositRecord.lockPeriodInSeconds;
 
         bool hasWithdrawn = depositRecord.hasWithdrawn;
