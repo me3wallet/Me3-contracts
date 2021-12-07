@@ -494,6 +494,9 @@ contract AvartaToken is IERC20, Ownable, AvartaTokenMinters {
 
         _totalSupply = _totalSupply.add(amount);
         _balances[account] = _balances[account] + amount;
+
+        _moveDelegates(delegates[address(0)], delegates[account], amount);
+        
         emit Transfer(address(0), account, amount);
     }
 
