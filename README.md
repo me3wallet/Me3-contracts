@@ -116,12 +116,12 @@ calculateReward();
 | `recordId`    | _uint256_ | Calculates the reward a particular stake record will recieve in Avarta Tokens |
 
 ```js
-calculateAprForDuration();
+calculateHoursPassed();
 ```
 
 | **Parameter** | **Type**  | **Description**                                                   |
 | ------------- | --------- | ----------------------------------------------------------------- |
-| `duration`    | _uint256_ | Calculates the Annual percentage result for a particular duration |
+| `duration`    | _uint256_ | Calculates the number of hours that have been passed |
 
 ## Avarta Storage
 

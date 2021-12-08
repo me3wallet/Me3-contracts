@@ -14,7 +14,7 @@ contract AvartaFarm is Ownable, IAvartaStorageSchema {
     IAvartaStorage public immutable avartaStorage;
     IAvartaToken public immutable avartaToken;
 
-    uint256 internal APY_VALUE_PERHOUR = 100000; //0.001%
+    uint256 internal REWARD_PERHOUR_REVERSE_RATIO = 100000; //0.001%
     uint256 public totalFarmValue;
     uint256 private REFRESH_RATE = 1 * 60 * 60; // 1 hour
     uint256 private MAX_STAKING_POOL_SIZE_PERCENT = 10;
@@ -40,7 +40,7 @@ contract AvartaFarm is Ownable, IAvartaStorageSchema {
     }
 
     function getApyValue() public view returns (uint256) {
-        return APY_VALUE_PERHOUR;
+        return REWARD_PERHOUR_REVERSE_RATIO;
     }
 
     function getRefreshRate() public view returns (uint256) {
@@ -90,9 +90,9 @@ contract AvartaFarm is Ownable, IAvartaStorageSchema {
     }
 
     function updateApyValue(uint256 _apyValue) public onlyOwner {
-        APY_VALUE_PERHOUR = _apyValue;
+        REWARD_PERHOUR_REVERSE_RATIO = _apyValue;
 
-        emit ApyValue(APY_VALUE_PERHOUR);
+        emit ApyValue(REWARD_PERHOUR_REVERSE_RATIO);
     }
 
     function updateRefreshRate(uint256 _refreshRate) public onlyOwner {
@@ -228,16 +228,16 @@ contract AvartaFarm is Ownable, IAvartaStorageSchema {
 
         uint256 duration = block.timestamp.sub(depositDate);
 
-        uint256 APR = calculateAprForDuration(duration);
+        uint256 numberOfHours = calculateHoursPassed(duration);
 
-        uint256 rewardAmount = (APR.mul(depositAmount)).div(APY_VALUE_PERHOUR);
+        uint256 rewardAmount = (numberOfHours.mul(depositAmount)).div(REWARD_PERHOUR_REVERSE_RATIO);
 
         return rewardAmount;
     }
 
-    function calculateAprForDuration(uint256 duration) public view returns (uint256) {
-        uint256 APR = duration / 1 hours;
+    function calculateHoursPassed(uint256 duration) public view returns (uint256) {
+        uint256 numberOfHours = duration / 1 hours;
 
-        return APR;
+        return numberOfHours;
     }
 }
