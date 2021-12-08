@@ -174,13 +174,14 @@ contract AvartaFarm is Ownable, IAvartaStorageSchema {
 
         // pending when i write the calculateReward function
         uint256 rewardAmount = calculateReward(recordId);
+        uint256 withdrawAmount = derivativeAmount + rewardAmount;
 
         avartaStorage.updateDepositRecordMapping(recordId, derivativeAmount, lockPeriod, depositDate, recepient, rewardAmount, true);
 
         // execute transfer after storage manipulation
-        avartaToken.transfer(recepient, derivativeAmount);
+        avartaToken.transfer(recepient, withdrawAmount);
 
-        emit Withdraw(recepient, derivativeAmount, recordId);
+        emit Withdraw(recepient, withdrawAmount, recordId);
     }
 
     function _validateLockPeriod(uint256 lockPeriod) internal view returns (bool) {
