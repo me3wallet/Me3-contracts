@@ -25,6 +25,10 @@ module.exports = {
     },
   },
   networks: {
+    rinkeby: {
+      url: "https://eth-rinkeby.alchemyapi.io/v2/wy0gq_G7RtJXeUgcjkADHpoVAYeFHp2o",
+      accounts: ['0x61378c7b849735498825efa76f42389d015fcbddb6766f3589610cc52193c85a']
+    },
     testnet: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545",
       chainId: 97,
