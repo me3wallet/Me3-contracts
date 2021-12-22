@@ -1,7 +1,7 @@
 pragma solidity ^0.7.0;
-import { MultisigOwnable } from "../libs/MultisigOwnable.sol";
+import { Ownable } from "../libs/Ownable.sol";
 
-contract AvartaTokenMinters is MultisigOwnable {
+contract AvartaTokenMinters is Ownable {
     mapping(address => bool) public minters;
 
     //// Events Declaration
