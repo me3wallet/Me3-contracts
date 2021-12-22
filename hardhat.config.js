@@ -55,7 +55,8 @@ module.exports = {
     },
   },
   etherscan: {
-    apiKey: process.env.BSCSCAN_API_KEY,
+    /*apiKey: process.env.BSCSCAN_API_KEY,*/
+    apiKey: 'Z8BMQVST4M1351EH1W5VZRBMFG1FD4DPWD'
   },
   tenderly: {
     project: process.env.TENDERLY_PROJECT,

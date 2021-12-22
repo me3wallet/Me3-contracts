@@ -30,6 +30,7 @@
     "@ethersproject/bytes": "^5.4.0",
     "@ethersproject/providers": "^5.4.3",
     "@nomiclabs/hardhat-ethers": "^2.0.3",
+    "@nomiclabs/hardhat-etherscan": "^2.1.8",
     "@nomiclabs/hardhat-truffle5": "^2.0.0",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "@nomiclabs/hardhat-web3": "^2.0.0",
@@ -73,7 +74,6 @@
     "typechain": "cross-env TS_NODE_TRANSPILE_ONLY=true hardhat typechain"
   },
   "dependencies": {
-    "@nomiclabs/hardhat-etherscan": "^2.1.4",
     "@openzeppelin/contracts": "^4.3.1",
     "@openzeppelin/contracts-upgradeable": "^4.3.1",
     "@tenderly/hardhat-tenderly": "^1.0.12"
