@@ -1,8 +1,9 @@
+require("dotenv").config();
 require("@nomiclabs/hardhat-ethers");
 require("@tenderly/hardhat-tenderly");
 require("@nomiclabs/hardhat-etherscan");
-require("dotenv").config();
 require("@nomiclabs/hardhat-truffle5");
+require('@openzeppelin/hardhat-upgrades');
 
 const { utils } = require("ethers");
 
@@ -17,6 +18,9 @@ module.exports = {
     compilers: [
       {
         version: "0.7.0",
+      },
+      {
+        version: "0.8.0",
       },
     ],
     optimizer: {

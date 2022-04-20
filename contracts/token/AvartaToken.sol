@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.7.0;
-import { AvartaTokenMinters } from "./AvartaTokenMinters.sol";
-import { Ownable } from "../libs/Ownable.sol";
-import { IERC20 } from "../libs/IERC20.sol";
-import { SafeMath } from "../libs/SafeMath.sol";
+pragma solidity ^0.8.0;
+
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/interfaces/IERC20.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "./AvartaTokenMinters.sol";
+
+uint256 constant MASK = type(uint128).max;
 
 contract AvartaToken is IERC20, Ownable, AvartaTokenMinters {
     using SafeMath for uint256;
@@ -167,8 +170,8 @@ contract AvartaToken is IERC20, Ownable, AvartaTokenMinters {
         uint256 rawAmount
     ) internal {
         uint256 amount;
-        if (rawAmount == uint256(-1)) {
-            amount = uint256(-1);
+        if (rawAmount == MASK) {
+            amount = MASK;
         } else {
             amount = safe96(rawAmount, "AvartaToken::approve: amount exceeds 96 bits");
         }
@@ -206,7 +209,7 @@ contract AvartaToken is IERC20, Ownable, AvartaTokenMinters {
         uint256 spenderAllowance = _allowance[src][spender];
         uint256 amount = safe96(rawAmount, "AvartaToken::approve: amount exceeds 96 bits");
 
-        if (spender != src && spenderAllowance != uint256(-1)) {
+        if (spender != src && spenderAllowance != MASK) {
             uint256 newAllowance = sub96(spenderAllowance, amount, "AvartaToken::transferFrom: transfer amount exceeds spender allowance");
             _allowance[src][spender] = newAllowance;
 
@@ -228,7 +231,7 @@ contract AvartaToken is IERC20, Ownable, AvartaTokenMinters {
 
         address spender = msg.sender;
         uint256 spenderAllowance = _allowance[account][spender];
-        if (spender != account && spenderAllowance != uint256(-1)) {
+        if (spender != account && spenderAllowance != MASK) {
             uint256 newAllowance = sub96(spenderAllowance, amount, "AvartaToken::burnFrom: burn amount exceeds allowance");
             _allowance[account][spender] = newAllowance;
             emit Approval(account, spender, newAllowance);
@@ -340,7 +343,8 @@ contract AvartaToken is IERC20, Ownable, AvartaTokenMinters {
         uint32 lower = 0;
         uint32 upper = nCheckpoints - 1;
         while (upper > lower) {
-            uint32 center = upper - (upper - lower) / 2; // ceil, avoiding overflow
+            uint32 center = upper - (upper - lower) / 2;
+            // ceil, avoiding overflow
             Checkpoint memory cp = checkpoints[account][center];
             if (cp.fromBlock == blockNumber) {
                 return cp.votes;
@@ -419,12 +423,12 @@ contract AvartaToken is IERC20, Ownable, AvartaTokenMinters {
     }
 
     function safe32(uint256 n, string memory errorMessage) internal pure returns (uint32) {
-        require(n < 2**32, errorMessage);
+        require(n < 2 ** 32, errorMessage);
         return uint32(n);
     }
 
     function safe96(uint256 n, string memory errorMessage) internal pure returns (uint256) {
-        require(n < 2**96, errorMessage);
+        require(n < 2 ** 96, errorMessage);
         return uint256(n);
     }
 
@@ -447,7 +451,7 @@ contract AvartaToken is IERC20, Ownable, AvartaTokenMinters {
         return a - b;
     }
 
-    function getChainId() internal pure returns (uint256) {
+    function getChainId() internal view returns (uint256) {
         uint256 chainId;
         // solhint-disable no-inline-assembly
         assembly {
@@ -496,7 +500,7 @@ contract AvartaToken is IERC20, Ownable, AvartaTokenMinters {
         _balances[account] = _balances[account] + amount;
 
         _moveDelegates(delegates[address(0)], delegates[account], amount);
-        
+
         emit Transfer(address(0), account, amount);
     }
 

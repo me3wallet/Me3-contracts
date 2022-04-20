@@ -1,5 +1,5 @@
-pragma solidity ^0.7.0;
-import { Ownable } from "../libs/Ownable.sol";
+pragma solidity ^0.8.0;
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract AvartaTokenMinters is Ownable {
     mapping(address => bool) public minters;
