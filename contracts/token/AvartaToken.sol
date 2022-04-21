@@ -68,6 +68,8 @@ contract AvartaToken is Initializable, ContextUpgradeable, ERC20Upgradeable, Ava
 
     grantAccess(msg.sender);
     mint(owner_, totalSupply_);
+    revokeAccess(msg.sender);
+
     _transferOwnership(owner_);
   }
 
