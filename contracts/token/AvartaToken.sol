@@ -41,13 +41,15 @@ contract AvartaToken is Initializable, ContextUpgradeable, ERC20Upgradeable, Ava
   mapping(address => uint32) public numCheckpoints;
 
   /// @notice The EIP-712 typehash for the contract's domain
-  bytes32 public constant DOMAIN_TYPEHASH = keccak256("EIP712Domain(string name,uint256 chainId,address verifyingContract)");
+  bytes32 public constant DOMAIN_TYPEHASH =
+    keccak256("EIP712Domain(string name,uint256 chainId,address verifyingContract)");
 
   /// @notice The EIP-712 typehash for the delegation struct used by the contract
   bytes32 public constant DELEGATION_TYPEHASH = keccak256("Delegation(address delegatee,uint256 nonce,uint256 expiry)");
 
   /// @notice The EIP-712 typehash for EIP-2612 permit
-  bytes32 public constant PERMIT_TYPEHASH = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
+  bytes32 public constant PERMIT_TYPEHASH =
+    keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
 
   /// @notice A record of states for signing / validating signatures
   mapping(address => uint256) public nonces;
@@ -57,50 +59,52 @@ contract AvartaToken is Initializable, ContextUpgradeable, ERC20Upgradeable, Ava
   function initialize(
     string memory name_,
     string memory symbol_,
-    uint256 totalSupply_
+    uint256 totalSupply_,
+    address owner_
   ) public initializer {
-    super.__Ownable_init();
+    __Ownable_init();
     __ERC20_init(name_, symbol_);
     __Context_init();
 
     grantAccess(msg.sender);
-    mint(msg.sender, totalSupply_);
+    mint(owner_, totalSupply_);
+    _transferOwnership(owner_);
   }
 
   /**
    * @notice Burn `rawAmount` tokens from `account`
-     * @param account The address of the account to burn
-     * @param rawAmount The number of tokens to burn
-     */
+   * @param account The address of the account to burn
+   * @param rawAmount The number of tokens to burn
+   */
   function burnFrom(address account, uint256 rawAmount) public {
     address spender = msg.sender;
     require(account != address(0) && spender != account, "AvartaToken::burnFrom: cannot burn from the zero address");
 
     uint256 spenderAllowance = allowance(account, spender);
     require(spenderAllowance >= rawAmount, "AvartaToken::burnFrom: burn amount exceeds allowance");
-  unchecked {
-    _approve(account, spender, spenderAllowance - rawAmount);
-  }
+    unchecked {
+      _approve(account, spender, spenderAllowance - rawAmount);
+    }
     _burn(account, rawAmount);
   }
 
   /**
    * @notice Delegate votes from `msg.sender` to `delegatee`
-     * @param delegatee The address to delegate votes to
-     */
+   * @param delegatee The address to delegate votes to
+   */
   function delegate(address delegatee) public {
     return _delegate(msg.sender, delegatee);
   }
 
   /**
    * @notice Delegates votes from signatory to `delegatee`
-     * @param delegatee The address to delegate votes to
-     * @param nonce The contract state required to match the signature
-     * @param expiry The time at which to expire the signature
-     * @param v The recovery byte of the signature
-     * @param r Half of the ECDSA signature pair
-     * @param s Half of the ECDSA signature pair
-     */
+   * @param delegatee The address to delegate votes to
+   * @param nonce The contract state required to match the signature
+   * @param expiry The time at which to expire the signature
+   * @param v The recovery byte of the signature
+   * @param r Half of the ECDSA signature pair
+   * @param s Half of the ECDSA signature pair
+   */
   function delegateBySig(
     address delegatee,
     uint256 nonce,
@@ -126,13 +130,13 @@ contract AvartaToken is Initializable, ContextUpgradeable, ERC20Upgradeable, Ava
 
   /**
    * @notice Approves spender to spend on behalf of owner.
-     * @param owner The signer of the permit
-     * @param spender The address to approve
-     * @param deadline The time at which the signature expires
-     * @param v The recovery byte of the signature
-     * @param r Half of the ECDSA signature pair
-     * @param s Half of the ECDSA signature pair
-     */
+   * @param owner The signer of the permit
+   * @param spender The address to approve
+   * @param deadline The time at which the signature expires
+   * @param v The recovery byte of the signature
+   * @param r Half of the ECDSA signature pair
+   * @param s Half of the ECDSA signature pair
+   */
   function permit(
     address owner,
     address spender,
@@ -153,9 +157,9 @@ contract AvartaToken is Initializable, ContextUpgradeable, ERC20Upgradeable, Ava
 
   /**
    * @notice Gets the current votes balance for `account`
-     * @param account The address to get votes balance
-     * @return The number of current votes for `account`
-     */
+   * @param account The address to get votes balance
+   * @return The number of current votes for `account`
+   */
   function getCurrentVotes(address account) external view returns (uint256) {
     uint32 nCheckpoints = numCheckpoints[account];
     return nCheckpoints > 0 ? checkpoints[account][nCheckpoints - 1].votes : 0;
@@ -163,11 +167,11 @@ contract AvartaToken is Initializable, ContextUpgradeable, ERC20Upgradeable, Ava
 
   /**
    * @notice Determine the prior number of votes for an account as of a block number
-     * @dev Block number must be a finalized block or else this function will revert to prevent misinformation.
-     * @param account The address of the account to check
-     * @param blockNumber The block number to get the vote balance at
-     * @return The number of votes the account had as of the given block
-     */
+   * @dev Block number must be a finalized block or else this function will revert to prevent misinformation.
+   * @param account The address of the account to check
+   * @param blockNumber The block number to get the vote balance at
+   * @return The number of votes the account had as of the given block
+   */
   function getPriorVotes(address account, uint256 blockNumber) public view returns (uint256) {
     require(blockNumber < block.number, "AvartaToken::getPriorVotes: not yet determined");
 
@@ -306,7 +310,7 @@ contract AvartaToken is Initializable, ContextUpgradeable, ERC20Upgradeable, Ava
   }
 
   function safe32(uint256 n, string memory errorMessage) internal pure returns (uint32) {
-    require(n < 2 ** 32, errorMessage);
+    require(n < 2**32, errorMessage);
     return uint32(n);
   }
 }

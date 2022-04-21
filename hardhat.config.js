@@ -5,11 +5,10 @@ require("@nomiclabs/hardhat-etherscan");
 require("@nomiclabs/hardhat-truffle5");
 require('@openzeppelin/hardhat-upgrades');
 require('hardhat-contract-sizer');
-
 const { utils } = require("ethers");
 
-const PRIVATE_KEY = process.env.PRIVATE_KEY;
-const PRIVATE_KEY_GANACHE = process.env.PRIVATE_KEY_GANACHE;
+const PRIVATE_KEY = '0x' + process.env.PRIVATE_KEY;
+const PRIVATE_KEY_GANACHE = '0x' + process.env.PRIVATE_KEY_GANACHE;
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
@@ -41,25 +40,23 @@ module.exports = {
   networks: {
     rinkeby: {
       url: "https://eth-rinkeby.alchemyapi.io/v2/wy0gq_G7RtJXeUgcjkADHpoVAYeFHp2o",
-      accounts: [`0x${PRIVATE_KEY}`]
+      accounts: [PRIVATE_KEY]
     },
     testnet: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545",
       chainId: 97,
-      gas: 2100000,
-      gasPrice: 80000000000,
-      accounts: [`0x${PRIVATE_KEY}`],
+      accounts: [PRIVATE_KEY],
     },
     localhost: {
       url: `http://localhost:8545`,
-      accounts: [`0x${PRIVATE_KEY_GANACHE}`],
+      accounts: [PRIVATE_KEY_GANACHE],
       timeout: 150000,
       gasPrice: parseInt(utils.parseUnits("132", "gwei")),
     },
     mainnet: {
       url: "https://bsc-dataseed.binance.org/",
       chainId: 56,
-      accounts: [`0x${PRIVATE_KEY}`],
+      accounts: [PRIVATE_KEY],
     },
     hardhat: {
       forking: {
