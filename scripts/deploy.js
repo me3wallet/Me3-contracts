@@ -1,5 +1,5 @@
 const hre = require("hardhat");
-const { ethers } = hre;
+const { ethers, upgrades } = hre;
 
 async function main() {
   const admin = "0xc2C320Eadf2D45bf5acE2f78271385878F7737ae";

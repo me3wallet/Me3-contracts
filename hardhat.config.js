@@ -5,6 +5,7 @@ require("@nomiclabs/hardhat-etherscan");
 require("@nomiclabs/hardhat-truffle5");
 require('@openzeppelin/hardhat-upgrades');
 
+
 const { utils } = require("ethers");
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
@@ -22,10 +23,13 @@ module.exports = {
       {
         version: "0.8.0",
       },
+      {
+        version: "0.8.4",
+      },
     ],
     optimizer: {
       enabled: true,
-      runs: 200,
+      runs: 1000,
     },
   },
   networks: {
