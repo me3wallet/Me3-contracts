@@ -1,3 +1,4 @@
+require("dotenv").config();
 const hre = require("hardhat");
 const { ethers, upgrades } = hre;
 
@@ -6,9 +7,13 @@ async function main() {
   const multisigWallet = "0xf28EC1C0d93D86f1c4b8A725d2e821Db5411a16b";
 
   const AvartaToken = await ethers.getContractFactory("AvartaToken");
-  const avartaToken = await AvartaToken.deploy("Avarta Token", "AVT", "1000000000000000000000000000");
+  // const avartaToken = await AvartaToken.deploy("Avarta Token", "AVT", "1000000000000000000000000000");
+  const avartaToken = await upgrades.deployProxy(AvartaToken, ["Avarta Token", "AVT", "1000000000000000000000000000"]);
   await avartaToken.deployed();
-  console.log(`avartaToken  Deployed: ${avartaToken.address}`);
+  const adminAddr = await upgrades.erc1967.getAdminAddress(avartaToken.address);
+  const implAddr = await upgrades.erc1967.getImplementationAddress(avartaToken.address);
+  console.log(`avartaToken  Deployed: ${avartaToken.address} => ${adminAddr}, ${implAddr}`);
+
   await avartaToken.transferOwnership(multisigWallet);
   console.log(`avartaToken's owner has been transferred to multisig: ${multisigWallet}`);
 
@@ -39,6 +44,9 @@ async function main() {
       address: avartaToken.address,
       constructorArguments: ["Avarta Token", "AVT", "1000000000000000000000000000"],
     });
+    await hre.run("verify:verify", {address: adminAddr});
+    await hre.run("verify:verify", {address: implAddr});
+
     await hre.run("verify:verify", {
       address: timeLock.address,
       constructorArguments: [admin, "259200"],

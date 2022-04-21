@@ -4,7 +4,7 @@ require("@tenderly/hardhat-tenderly");
 require("@nomiclabs/hardhat-etherscan");
 require("@nomiclabs/hardhat-truffle5");
 require('@openzeppelin/hardhat-upgrades');
-
+require('hardhat-contract-sizer');
 
 const { utils } = require("ethers");
 
@@ -13,24 +13,30 @@ const PRIVATE_KEY_GANACHE = process.env.PRIVATE_KEY_GANACHE;
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
+
+const settings = {
+  optimizer: {
+    enabled: true,
+    runs: 200,
+  },
+};
 module.exports = {
   defaultNetwork: "localhost",
   solidity: {
     compilers: [
       {
         version: "0.7.0",
+        settings,
       },
       {
         version: "0.8.0",
+        settings,
       },
       {
-        version: "0.8.4",
+        version: "0.8.2",
+        settings,
       },
-    ],
-    optimizer: {
-      enabled: true,
-      runs: 1000,
-    },
+    ]
   },
   networks: {
     rinkeby: {
@@ -40,7 +46,8 @@ module.exports = {
     testnet: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545",
       chainId: 97,
-      gasPrice: 20000000000,
+      gas: 2100000,
+      gasPrice: 80000000000,
       accounts: [`0x${PRIVATE_KEY}`],
     },
     localhost: {
@@ -63,11 +70,17 @@ module.exports = {
     },
   },
   etherscan: {
-    /*apiKey: process.env.BSCSCAN_API_KEY,*/
-    apiKey: 'Z8BMQVST4M1351EH1W5VZRBMFG1FD4DPWD'
+    // apiKey: 'Z8BMQVST4M1351EH1W5VZRBMFG1FD4DPWD',
+    apiKey: process.env.BSCSCAN_API_KEY,
   },
   tenderly: {
     project: process.env.TENDERLY_PROJECT,
     username: process.env.TENDERLY_USERNAME,
   },
+  contractSizer: {
+    alphaSort: true,
+    disambiguatePaths: false,
+    runOnCompile: true,
+    strict: true
+  }
 };

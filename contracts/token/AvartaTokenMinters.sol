@@ -1,36 +1,37 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.0;
-import "@openzeppelin/contracts/access/Ownable.sol";
 
-abstract contract AvartaTokenMinters is Ownable {
-    mapping(address => bool) public minters;
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-    //// Events Declaration
-    event AccessGranted(address indexed owner, address indexed minter);
-    event AccessRevoked(address indexed owner, address indexed minter);
+abstract contract AvartaTokenMinters is OwnableUpgradeable {
+  mapping(address => bool) public minters;
 
-    modifier onlyMinter() {
-        bool hasAccess = minters[msg.sender];
-        require(hasAccess == true, "mint access has not been granted to this account");
-        _;
-    }
+  //// Events Declaration
+  event AccessGranted(address indexed owner, address indexed minter);
+  event AccessRevoked(address indexed owner, address indexed minter);
 
-    function grantAccess(address minter) public onlyOwner {
-        bool hasAccess = minters[minter];
+  modifier onlyMinter() {
+    bool hasAccess = minters[msg.sender];
+    require(hasAccess == true, "mint access has not been granted to this account");
+    _;
+  }
 
-        require(hasAccess == false, "minter has already been granted access");
-        minters[minter] = true;
+  function grantAccess(address minter) public onlyOwner {
+    bool hasAccess = minters[minter];
 
-        emit AccessGranted(msg.sender, minter);
-    }
+    require(hasAccess == false, "minter has already been granted access");
+    minters[minter] = true;
 
-    function revokeAccess(address minter) public onlyOwner {
-        bool hasAccess = minters[minter];
+    emit AccessGranted(msg.sender, minter);
+  }
 
-        require(hasAccess == true, "minter has not been granted access");
-        minters[minter] = false;
+  function revokeAccess(address minter) public onlyOwner {
+    bool hasAccess = minters[minter];
 
-        emit AccessRevoked(msg.sender, minter);
-    }
+    require(hasAccess == true, "minter has not been granted access");
+    minters[minter] = false;
+
+    emit AccessRevoked(msg.sender, minter);
+  }
 }

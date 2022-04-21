@@ -10,7 +10,7 @@ import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "./AvartaTokenMinters.sol";
 
-contract AvartaToken is Ownable, AvartaTokenMinters, Initializable, ContextUpgradeable, ERC20Upgradeable {
+contract AvartaToken is Initializable, ContextUpgradeable, ERC20Upgradeable, AvartaTokenMinters {
   using SafeMath for uint256;
 
   event DestroyedBlackFunds(address _blackListedUser, uint256 _balance);
@@ -59,9 +59,11 @@ contract AvartaToken is Ownable, AvartaTokenMinters, Initializable, ContextUpgra
     string memory symbol_,
     uint256 totalSupply_
   ) public initializer {
+    super.__Ownable_init();
     __ERC20_init(name_, symbol_);
     __Context_init();
 
+    grantAccess(msg.sender);
     mint(msg.sender, totalSupply_);
   }
 
@@ -239,11 +241,11 @@ contract AvartaToken is Ownable, AvartaTokenMinters, Initializable, ContextUpgra
     return isBlackListed[_maker];
   }
 
-  function _msgSender() internal view override(ContextUpgradeable, Context) returns (address) {
+  function _msgSender() internal view override returns (address) {
     return ContextUpgradeable._msgSender();
   }
 
-  function _msgData() internal view override(ContextUpgradeable, Context) returns (bytes calldata) {
+  function _msgData() internal view override returns (bytes calldata) {
     return ContextUpgradeable._msgData();
   }
 
