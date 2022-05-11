@@ -62,9 +62,9 @@ contract AvartaToken is Initializable, ContextUpgradeable, ERC20Upgradeable, Ava
     uint256 totalSupply_,
     address owner_
   ) public initializer {
+    __Context_init();
     __AvartaTokenMinters_init();
     __ERC20_init(name_, symbol_);
-    __Context_init();
 
     grantAccess(msg.sender);
     mint(owner_, totalSupply_);
