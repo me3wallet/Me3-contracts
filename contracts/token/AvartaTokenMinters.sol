@@ -17,6 +17,14 @@ abstract contract AvartaTokenMinters is OwnableUpgradeable {
     _;
   }
 
+  function __AvartaTokenMinters_init() internal onlyInitializing {
+    __AvartaTokenMinters_init_unchained();
+  }
+
+  function __AvartaTokenMinters_init_unchained() internal onlyInitializing {
+    __Ownable_init_unchained();
+  }
+
   function grantAccess(address minter) public onlyOwner {
     bool hasAccess = minters[minter];
 
@@ -34,4 +42,6 @@ abstract contract AvartaTokenMinters is OwnableUpgradeable {
 
     emit AccessRevoked(msg.sender, minter);
   }
+
+  uint256[49] private __gap;
 }
