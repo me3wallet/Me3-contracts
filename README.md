@@ -1,4 +1,4 @@
-# Avarta
+# Me3
 
 ## Usage
 
@@ -84,11 +84,11 @@ compiler version is to add the following fields to your VSCode user settings:
 
 Where of course `v0.8.4+commit.c7e474f2` can be replaced with any other version.
 
-## Understanding the Avarta Contracts
+## Understanding the me3 Contracts
 
-## Avarta Farm
+## Me3 Farm
 
-This is the core protocol for the avarta farming contract.
+This is the core protocol for the me3 farming contract.
 
 ```js
 stake();
@@ -96,7 +96,7 @@ stake();
 
 | **Parameter** | **Type**  | **Description**                                        |
 | ------------- | --------- | ------------------------------------------------------ |
-| `amount`      | _uint256_ | The amount a user wants to stake in the avarta farm    |
+| `amount`      | _uint256_ | The amount a user wants to stake in the me3 farm    |
 | `lockPeriod`  | _uint256_ | Total amount of time user wants his funds to be locked |
 
 ```js
@@ -105,7 +105,7 @@ withdraw();
 
 | **Parameter** | **Type**  | **Description**                                                   |
 | ------------- | --------- | ----------------------------------------------------------------- |
-| `amount`      | _uint256_ | The amount of stake a user wants to withdraw from the avarta farm |
+| `amount`      | _uint256_ | The amount of stake a user wants to withdraw from the me3 farm |
 
 ```js
 calculateReward();
@@ -113,7 +113,7 @@ calculateReward();
 
 | **Parameter** | **Type**  | **Description**                                                               |
 | ------------- | --------- | ----------------------------------------------------------------------------- |
-| `recordId`    | _uint256_ | Calculates the reward a particular stake record will recieve in Avarta Tokens |
+| `recordId`    | _uint256_ | Calculates the reward a particular stake record will recieve in me3 Tokens |
 
 ```js
 calculateHoursPassed();
@@ -123,6 +123,6 @@ calculateHoursPassed();
 | ------------- | --------- | ----------------------------------------------------------------- |
 | `duration`    | _uint256_ | Calculates the number of hours that have been passed |
 
-## Avarta Storage
+## Me3 Storage
 
-The avarta storage contract is the DB of the Avarta protocol. It holds the getter and setter methods of the avarta protocol
+The Me3 storage contract is the DB of the me3 protocol. It holds the getter and setter methods of the me3 protocol
