@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.7.0;
 pragma experimental ABIEncoderV2;
-import { IAvartaStorageSchema } from "./IAvartaStorageSchema.sol";
+import { IMe3StorageSchema } from "./IMe3StorageSchema.sol";
 
-interface IAvartaStorage is IAvartaStorageSchema {
+interface IMe3Storage is IMe3StorageSchema {
     function getRecordIndexFromDepositor(address member) external view returns (uint256);
 
     function createDepositRecordMapping(

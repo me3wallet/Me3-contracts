@@ -30,7 +30,7 @@ pragma experimental ABIEncoderV2;
 
 contract Governor {
     /// @notice The name of this contract
-    string public constant NAME = "Avarta Governor";
+    string public constant NAME = "Me3 Governor";
 
     /// @notice The number of votes in support of a proposal required in order for a quorum to be reached and for a vote to succeed
     function quorumVotes() public pure returns (uint256) {
@@ -57,10 +57,10 @@ contract Governor {
         return 17280;
     } // ~3 days in blocks (assuming 15s blocks)
 
-    /// @notice The address of the Avarta Protocol Timelock
+    /// @notice The address of the Me3 Protocol Timelock
     TimelockInterface public immutable timelock;
 
-    /// @notice The address of the Avarta governance token
+    /// @notice The address of the Me3 governance token
     TokenInterface public immutable token;
 
     /// @notice The address of the Governor Guardian

@@ -1,7 +1,7 @@
 pragma solidity ^0.7.0;
 import { Ownable } from "../libs/Ownable.sol";
 
-contract AvartaTokenMinters is Ownable {
+contract Me3TokenMinters is Ownable {
     mapping(address => bool) public minters;
 
     //// Events Declaration

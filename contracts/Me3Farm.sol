@@ -2,17 +2,17 @@
 
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
-import { IAvartaToken } from "./interface/IAvartaToken.sol";
-import { IAvartaStorage } from "./interface/IAvartaStorage.sol";
-import { IAvartaStorageSchema } from "./interface/IAvartaStorageSchema.sol";
+import { IMe3Token } from "./interface/IMe3Token.sol";
+import { IMe3Storage } from "./interface/IMe3Storage.sol";
+import { IMe3StorageSchema } from "./interface/IMe3StorageSchema.sol";
 import { SafeMath } from "./libs/SafeMath.sol";
 import { Ownable } from "./libs/Ownable.sol";
 
-contract AvartaFarm is Ownable, IAvartaStorageSchema {
+contract Me3Farm is Ownable, IMe3StorageSchema {
     using SafeMath for uint256;
 
-    IAvartaStorage public immutable avartaStorage;
-    IAvartaToken public immutable avartaToken;
+    IMe3Storage public immutable me3Storage;
+    IMe3Token public immutable me3Token;
 
     uint256 internal REWARD_PERHOUR_REVERSE_RATIO = 100000; //0.001%
     uint256 public totalFarmValue;
@@ -35,8 +35,8 @@ contract AvartaFarm is Ownable, IAvartaStorageSchema {
     event PrecisionValue(uint256 indexed precisionValue);
 
     constructor(address storageAddress, address tokenAddress) {
-        avartaStorage = IAvartaStorage(storageAddress);
-        avartaToken = IAvartaToken(tokenAddress);
+        me3Storage = IMe3Storage(storageAddress);
+        me3Token = IMe3Token(tokenAddress);
     }
 
     function getApyValue() public view returns (uint256) {
@@ -76,7 +76,7 @@ contract AvartaFarm is Ownable, IAvartaStorageSchema {
             uint256 lockPeriodInSeconds,
             uint256 rewardAmountRecieved,
             bool hasWithdrawn
-        ) = avartaStorage.getRecordById(recordId);
+        ) = me3Storage.getRecordById(recordId);
         FixedDepositRecord memory fixedDepositRecord = FixedDepositRecord(
             recordId,
             depositorId,
@@ -102,8 +102,8 @@ contract AvartaFarm is Ownable, IAvartaStorageSchema {
     }
 
     function updateMaxStakingPoolSize() public onlyOwner {
-        // 10% of the avartaToken total supply
-        MAX_STAKING_POOL_SIZE = (avartaToken.totalSupply() * MAX_STAKING_POOL_SIZE_PERCENT) / 100;
+        // 10% of the me3Token total supply
+        MAX_STAKING_POOL_SIZE = (me3Token.totalSupply() * MAX_STAKING_POOL_SIZE_PERCENT) / 100;
 
         emit MaxStakingPoolSize(MAX_STAKING_POOL_SIZE);
     }
@@ -127,7 +127,7 @@ contract AvartaFarm is Ownable, IAvartaStorageSchema {
 
         _validateLockPeriod(lockPeriod);
 
-        require(avartaToken.balanceOf(depositor) >= amount, "Not enough avarta token balance");
+        require(me3Token.balanceOf(depositor) >= amount, "Not enough me3 token balance");
 
         //check that the totalFarmValue is less than the max staking pool size
         require(totalFarmValue < MAX_STAKING_POOL_SIZE, "The totalFarmValue has reached limit");
@@ -137,19 +137,19 @@ contract AvartaFarm is Ownable, IAvartaStorageSchema {
         require(totalFarmValue + amount <= MAX_STAKING_POOL_SIZE, "The totalFarmValue + amount has reached limit");
 
         // check allowance for the depositor
-        require(avartaToken.allowance(depositor, address(this)) >= amount, "Not enough avarta token allowance");
+        require(me3Token.allowance(depositor, address(this)) >= amount, "Not enough me3 token allowance");
 
-        // transfer avarta token to the smart contract
-        avartaToken.transferFrom(depositor, address(this), amount);
+        // transfer me3 token to the smart contract
+        me3Token.transferFrom(depositor, address(this), amount);
 
         // update the totalFarmValue
         totalFarmValue = totalFarmValue.add(amount);
 
-        uint256 recordId = avartaStorage.createDepositRecordMapping(amount, lockPeriod, depositDate, depositor, 0, false);
+        uint256 recordId = me3Storage.createDepositRecordMapping(amount, lockPeriod, depositDate, depositor, 0, false);
 
-        avartaStorage.createDepositorToDepositRecordIndexToRecordIDMapping(depositor, recordId);
+        me3Storage.createDepositorToDepositRecordIndexToRecordIDMapping(depositor, recordId);
 
-        avartaStorage.createDepositorAddressToDepositRecordMapping(depositor, recordId, amount, lockPeriod, depositDate, 0, false);
+        me3Storage.createDepositorAddressToDepositRecordMapping(depositor, recordId, amount, lockPeriod, depositDate, 0, false);
 
         emit Stake(depositor, amount, recordId);
 
@@ -176,10 +176,10 @@ contract AvartaFarm is Ownable, IAvartaStorageSchema {
         uint256 rewardAmount = calculateReward(recordId);
         uint256 withdrawAmount = derivativeAmount + rewardAmount;
 
-        avartaStorage.updateDepositRecordMapping(recordId, derivativeAmount, lockPeriod, depositDate, recepient, rewardAmount, true);
+        me3Storage.updateDepositRecordMapping(recordId, derivativeAmount, lockPeriod, depositDate, recepient, rewardAmount, true);
 
         // execute transfer after storage manipulation
-        avartaToken.transfer(recepient, withdrawAmount);
+        me3Token.transfer(recepient, withdrawAmount);
 
         emit Withdraw(recepient, withdrawAmount, recordId);
     }
@@ -208,7 +208,7 @@ contract AvartaFarm is Ownable, IAvartaStorageSchema {
     }
 
     function _updateRecord(FixedDepositRecord memory record) internal returns (bool) {
-        avartaStorage.updateDepositRecordMapping(
+        me3Storage.updateDepositRecordMapping(
             record.recordId,
             record.amountDeposited,
             record.lockPeriodInSeconds,

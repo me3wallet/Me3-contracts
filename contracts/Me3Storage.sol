@@ -2,14 +2,14 @@
 pragma solidity 0.7.0;
 pragma experimental ABIEncoderV2;
 import { SafeMath } from "./libs/SafeMath.sol";
-import { AvartaStorageOwners } from "./AvartaStorageOwners.sol";
-import { IAvartaStorageSchema } from "./interface/IAvartaStorageSchema.sol";
+import { Me3StorageOwners } from "./Me3StorageOwners.sol";
+import { IMe3StorageSchema } from "./interface/IMe3StorageSchema.sol";
 
 /**
- * @dev Contract for Avarta's proxy layer
+ * @dev Contract for Me3's proxy layer
  */
 
-contract AvartaStorage is IAvartaStorageSchema, AvartaStorageOwners {
+contract Me3Storage is IMe3StorageSchema, Me3StorageOwners {
     using SafeMath for uint256;
     uint256 public DepositRecordId;
 

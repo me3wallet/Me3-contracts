@@ -3,10 +3,10 @@
 pragma solidity 0.7.0;
 
 /**
- * @dev Contract for Avartas proxy layer
+ * @dev Contract for Me3s proxy layer
  */
 
-contract AvartaStorageOwners {
+contract Me3StorageOwners {
     address owner;
     mapping(address => bool) private storageOracles;
 

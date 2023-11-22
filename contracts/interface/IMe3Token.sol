@@ -3,7 +3,7 @@
 pragma solidity ^0.7.0;
 import { IERC20 } from "./IERC20.sol";
 
-interface IAvartaToken is IERC20 {
+interface IMe3Token is IERC20 {
     function getBlackListStatus(address _maker) external view returns (bool);
 
     function addBlackList(address _evilUser) external;

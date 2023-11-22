@@ -1,6 +1,6 @@
 {
-  "name": "avarta",
-  "description": "Avarta smart contracts",
+  "name": "me3",
+  "description": "Me3 smart contracts",
   "version": "1.0.0",
   "author": {
     "name": "Njoku Emmanuel",
@@ -29,6 +29,7 @@
     "@ethersproject/bignumber": "^5.4.1",
     "@ethersproject/bytes": "^5.4.0",
     "@ethersproject/providers": "^5.4.3",
+    "@nomiclabs/buidler": "^1.4.8",
     "@nomiclabs/hardhat-ethers": "^2.0.3",
     "@nomiclabs/hardhat-etherscan": "^2.1.8",
     "@nomiclabs/hardhat-truffle5": "^2.0.0",
@@ -63,7 +64,7 @@
     "compile": "hardhat compile",
     "coverage": "cross-env CODE_COVERAGE=true hardhat coverage --solcoverjs ./.solcover.js --temp artifacts --testfiles \"./test/**/*.ts\"",
     "deploy": "npx hardhat run --network mainnet scripts/deploy.js",
-    "deploy:testnet": "npx hardhat run --network testnet scripts/deploy.js",
+    "deploy:goerli": "npx hardhat run --network goerli scripts/deploy.js",
     "deploy:fork": "npx hardhat run --network hardhat scripts/deploy.js",
     "lint": "yarn run lint:sol && yarn run prettier:check",
     "lint:sol": "solhint --config ./.solhint.json --max-warnings 0 \"contracts/**/*.sol\"",

@@ -7,12 +7,12 @@ require("@nomiclabs/hardhat-truffle5");
 const { utils } = require("ethers");
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
-const PRIVATE_KEY_GANACHE = process.env.PRIVATE_KEY_GANACHE;
+// const PRIVATE_KEY_GANACHE = process.env.PRIVATE_KEY_GANACHE;
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-  defaultNetwork: "localhost",
+  defaultNetwork: "goerli",
   solidity: {
     compilers: [
       {
@@ -25,25 +25,25 @@ module.exports = {
     },
   },
   networks: {
-    rinkeby: {
-      url: "https://eth-rinkeby.alchemyapi.io/v2/wy0gq_G7RtJXeUgcjkADHpoVAYeFHp2o",
+    goerli: {
+      url: "https://small-holy-wave.ethereum-goerli.quiknode.pro/2136bd79203bbb3a515cf651c5de89e268d60b8d/",
       accounts: [`0x${PRIVATE_KEY}`]
     },
-    testnet: {
-      url: "https://data-seed-prebsc-1-s1.binance.org:8545",
-      chainId: 97,
-      gasPrice: 20000000000,
-      accounts: [`0x${PRIVATE_KEY}`],
-    },
-    localhost: {
-      url: `http://localhost:8545`,
-      accounts: [`0x${PRIVATE_KEY_GANACHE}`],
-      timeout: 150000,
-      gasPrice: parseInt(utils.parseUnits("132", "gwei")),
-    },
+    // testnet: {
+    //   url: "https://data-seed-prebsc-1-s1.binance.org:8545",
+    //   chainId: 97,
+    //   gasPrice: 20000000000,
+    //   accounts: [`0x${PRIVATE_KEY}`],
+    // },
+    // localhost: {
+    //   url: `http://localhost:8545`,
+    //   accounts: [`0x${PRIVATE_KEY_GANACHE}`],
+    //   timeout: 150000,
+    //   gasPrice: parseInt(utils.parseUnits("132", "gwei")),
+    // },
     mainnet: {
-      url: "https://bsc-dataseed.binance.org/",
-      chainId: 56,
+      url: "https://late-shy-breeze.quiknode.pro/cb2c775af8638f722111f91d72e5a80ccb2f0f07/",
+      chainId: 1,
       accounts: [`0x${PRIVATE_KEY}`],
     },
     hardhat: {
@@ -56,7 +56,7 @@ module.exports = {
   },
   etherscan: {
     /*apiKey: process.env.BSCSCAN_API_KEY,*/
-    apiKey: 'Z8BMQVST4M1351EH1W5VZRBMFG1FD4DPWD'
+    apiKey: ''
   },
   tenderly: {
     project: process.env.TENDERLY_PROJECT,

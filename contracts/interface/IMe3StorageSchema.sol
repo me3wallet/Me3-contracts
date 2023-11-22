@@ -2,7 +2,7 @@
 pragma solidity 0.7.0;
 pragma experimental ABIEncoderV2;
 
-interface IAvartaStorageSchema {
+interface IMe3StorageSchema {
     struct FixedDepositRecord {
         uint256 recordId;
         address payable depositorId;
