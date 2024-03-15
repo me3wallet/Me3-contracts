@@ -1,7 +1,9 @@
-pragma solidity ^0.7.0;
-import { Ownable } from "../libs/Ownable.sol";
+// SPDX-License-Identifier: MIT
 
-contract Me3TokenMinters is Ownable {
+pragma solidity ^0.8.22;
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+
+abstract contract Me3TokenMinters is Ownable {
     mapping(address => bool) public minters;
 
     //// Events Declaration
