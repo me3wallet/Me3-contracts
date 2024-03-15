@@ -1,29 +1,25 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.7.0;
-import { Me3TokenMinters } from "./Me3TokenMinters.sol";
-import { Ownable } from "../libs/Ownable.sol";
-import { IERC20 } from "../libs/IERC20.sol";
-import { SafeMath } from "../libs/SafeMath.sol";
+pragma solidity ^0.8.22;
 
-contract Me3Token is IERC20, Ownable, Me3TokenMinters {
+import { Me3TokenMinters } from "./Me3TokenMinters.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { SafeMath } from "@openzeppelin/contracts/utils/math/SafeMath.sol";
+
+abstract contract Me3Token is IERC20, Ownable, Me3TokenMinters {
     using SafeMath for uint256;
 
-    event DestroyedBlackFunds(address _blackListedUser, uint256 _balance);
-
-    event AddedBlackList(address _user);
-
-    event RemovedBlackList(address _user);
-
-    /// @notice An event thats emitted when an account changes its delegate
+    /// @notice An event that's emitted when an account changes its delegate
     event DelegateChanged(address indexed delegator, address indexed fromDelegate, address indexed toDelegate);
 
-    /// @notice An event thats emitted when a delegate account's vote balance changes
+    /// @notice An event that's emitted when a delegate account's vote balance changes
     event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance);
-    /// @notice A record of each accounts delegate
+
+    /// @notice A record of each account's delegate
     mapping(address => address) public delegates;
 
-    /// @notice A checkpoint for marking number of votes from a given block
+    /// @notice A checkpoint for marking the number of votes from a given block
     struct Checkpoint {
         uint32 fromBlock;
         uint256 votes;
@@ -43,6 +39,7 @@ contract Me3Token is IERC20, Ownable, Me3TokenMinters {
 
     /// @notice The EIP-712 typehash for EIP-2612 permit
     bytes32 public constant PERMIT_TYPEHASH = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
+
     /// @notice A record of states for signing / validating signatures
     mapping(address => uint256) public nonces;
 
@@ -59,67 +56,74 @@ contract Me3Token is IERC20, Ownable, Me3TokenMinters {
     uint8 private _decimals;
 
     /**
-     * @dev Sets the values for {name} and {symbol}, initializes {decimals} with
-     * a default value of 18.
-     *
-     * To select a different value for {decimals}, use {_setupDecimals}.
-     *
-     * All three of these values are immutable: they can only be set once during
-     * construction.
-     */
+    * @dev Sets the values for {name} and {symbol}, initializes {decimals} with
+    * a default value of 18.
+    *
+    * To select a different value for {decimals}, use {_setupDecimals}.
+    *
+    * All of these values are immutable: they can only be set once during
+    * construction.
+    */
     constructor(
         string memory name_,
         string memory symbol_,
-        uint256 totalSupply_
+        uint256 totalSupply_,
+ //     address initialOwner,
+        uint256 maxSupply
     ) {
         _name = name_;
         _symbol = symbol_;
         _totalSupply = totalSupply_;
         _decimals = 18;
+        maxSupply = 1000000000 * (10**_decimals);
+
+        // Mint tokens to contract deployer with a hard cap of 1,000,000,000
+        uint256 initialSupply = 1000000000 * (10**_decimals);
+        _mint(msg.sender, initialSupply);
     }
 
     /**
-     * @dev Returns the name of the token.
-     */
+    * @dev Returns the name of the token.
+    */
     function name() public view virtual returns (string memory) {
         return _name;
     }
 
     /**
-     * @dev Returns the symbol of the token, usually a shorter version of the
-     * name.
-     */
+    * @dev Returns the symbol of the token, usually a shorter version of the
+    * name.
+    */
     function symbol() public view virtual returns (string memory) {
         return _symbol;
     }
 
     /**
-     * @dev Returns the number of decimals used to get its user representation.
-     * For example, if `decimals` equals `2`, a balance of `505` tokens should
-     * be displayed to a user as `5,05` (`505 / 10 ** 2`).
-     *
-     * Tokens usually opt for a value of 18, imitating the relationship between
-     * Ether and Wei. This is the value {ERC20} uses, unless {_setupDecimals} is
-     * called.
-     *
-     * NOTE: This information is only used for _display_ purposes: it in
-     * no way affects any of the arithmetic of the contract, including
-     * {IERC20-balanceOf} and {IERC20-transfer}.
-     */
+    * @dev Returns the number of decimals used to get its user representation.
+    * For example, if `decimals` equals `2`, a balance of `505` tokens should
+    * be displayed to a user as `5,05` (`505 / 10 ** 2`).
+    *
+    * Tokens usually opt for a value of 18, imitating the relationship between
+    * Ether and Wei. This is the value {ERC20} uses, unless {_setupDecimals} is
+    * called.
+    *
+    * NOTE: This information is only used for _display_ purposes: it in
+    * no way affects any of the arithmetic of the contract, including
+    * {IERC20-balanceOf} and {IERC20-transfer}.
+    */
     function decimals() public view virtual returns (uint8) {
         return _decimals;
     }
 
     /**
-     * @dev See {IERC20-totalSupply}.
-     */
+    * @dev See {IERC20-totalSupply}.
+    */
     function totalSupply() public view virtual override returns (uint256) {
         return _totalSupply;
     }
 
     /**
-     * @dev See {IERC20-balanceOf}.
-     */
+    * @dev See {IERC20-balanceOf}.
+    */
     function balanceOf(address account) public view virtual override returns (uint256) {
         return _balances[account];
     }
@@ -131,31 +135,20 @@ contract Me3Token is IERC20, Ownable, Me3TokenMinters {
     }
 
     /**
-     * @dev See {IERC20-allowance}.
-     */
+    * @dev See {IERC20-allowance}.
+    */
     function allowance(address owner, address spender) public view virtual override returns (uint256) {
         return _allowance[owner][spender];
     }
 
     /**
-     * @dev Sets {decimals} to a value other than the default one of 18.
-     *
-     * WARNING: This function should only be called from the constructor. Most
-     * applications that interact with token contracts will not expect
-     * {decimals} to ever change, and may work incorrectly if it does.
-     */
-    function _setupDecimals(uint8 decimals_) internal virtual {
-        _decimals = decimals_;
-    }
-
-    /**
-     * @notice Approve `spender` to transfer up to `amount` from `src`
-     * @dev This will overwrite the approval amount for `spender`
-     *  and is subject to issues noted [here](https://eips.ethereum.org/EIPS/eip-20#approve)
-     * @param spender The address of the account which may transfer tokens
-     * @param rawAmount The number of tokens that are approved (2^256-1 means infinite)
-     * @return Whether or not the approval succeeded
-     */
+    * @notice Approve `spender` to transfer up to `amount` from `src`
+    * @dev This will overwrite the approval amount for `spender`
+    *  and is subject to issues noted [here](https://eips.ethereum.org/EIPS/eip-20#approve)
+    * @param spender The address of the account which may transfer tokens
+    * @param rawAmount The number of tokens that are approved (2^256-1 means infinite)
+    * @return Whether or not the approval succeeded
+    */
     function approve(address spender, uint256 rawAmount) external override returns (bool) {
         _approve(msg.sender, spender, rawAmount);
         return true;
@@ -167,8 +160,8 @@ contract Me3Token is IERC20, Ownable, Me3TokenMinters {
         uint256 rawAmount
     ) internal {
         uint256 amount;
-        if (rawAmount == uint256(-1)) {
-            amount = uint256(-1);
+        if (rawAmount == type(uint256).max) {
+            amount = type(uint256).max;
         } else {
             amount = safe96(rawAmount, "Me3Token::approve: amount exceeds 96 bits");
         }
@@ -179,11 +172,11 @@ contract Me3Token is IERC20, Ownable, Me3TokenMinters {
     }
 
     /**
-     * @notice Transfer `amount` tokens from `msg.sender` to `dst`
-     * @param dst The address of the destination account
-     * @param rawAmount The number of tokens to transfer
-     * @return Whether or not the transfer succeeded
-     */
+    * @notice Transfer `amount` tokens from `msg.sender` to `dst`
+    * @param dst The address of the destination account
+    * @param rawAmount The number of tokens to transfer
+    * @return Whether or not the transfer succeeded
+    */
     function transfer(address dst, uint256 rawAmount) external override returns (bool) {
         uint256 amount = safe96(rawAmount, "Me3Token::transfer: amount exceeds 96 bits");
         _transferTokens(msg.sender, dst, amount);
@@ -191,12 +184,12 @@ contract Me3Token is IERC20, Ownable, Me3TokenMinters {
     }
 
     /**
-     * @notice Transfer `amount` tokens from `src` to `dst`
-     * @param src The address of the source account
-     * @param dst The address of the destination account
-     * @param rawAmount The number of tokens to transfer
-     * @return Whether or not the transfer succeeded
-     */
+    * @notice Transfer `amount` tokens from `src` to `dst`
+    * @param src The address of the source account
+    * @param dst The address of the destination account
+    * @param rawAmount The number of tokens to transfer
+    * @return Whether or not the transfer succeeded
+    */
     function transferFrom(
         address src,
         address dst,
@@ -206,7 +199,7 @@ contract Me3Token is IERC20, Ownable, Me3TokenMinters {
         uint256 spenderAllowance = _allowance[src][spender];
         uint256 amount = safe96(rawAmount, "Me3Token::approve: amount exceeds 96 bits");
 
-        if (spender != src && spenderAllowance != uint256(-1)) {
+        if (spender != src && spenderAllowance != type(uint256).max) {
             uint256 newAllowance = sub96(spenderAllowance, amount, "Me3Token::transferFrom: transfer amount exceeds spender allowance");
             _allowance[src][spender] = newAllowance;
 
@@ -218,47 +211,22 @@ contract Me3Token is IERC20, Ownable, Me3TokenMinters {
     }
 
     /**
-     * @notice Burn `rawAmount` tokens from `account`
-     * @param account The address of the account to burn
-     * @param rawAmount The number of tokens to burn
-     */
-    function burnFrom(address account, uint256 rawAmount) public {
-        require(account != address(0), "Me3Token::burnFrom: cannot burn from the zero address");
-        uint256 amount = safe96(rawAmount, "Me3Token::burnFrom: amount exceeds 96 bits");
-
-        address spender = msg.sender;
-        uint256 spenderAllowance = _allowance[account][spender];
-        if (spender != account && spenderAllowance != uint256(-1)) {
-            uint256 newAllowance = sub96(spenderAllowance, amount, "Me3Token::burnFrom: burn amount exceeds allowance");
-            _allowance[account][spender] = newAllowance;
-            emit Approval(account, spender, newAllowance);
-        }
-
-        _balances[account] = sub96(_balances[account], amount, "Me3Token::burnFrom: burn amount exceeds balance");
-        emit Transfer(account, address(0), amount);
-
-        _moveDelegates(delegates[account], address(0), amount);
-
-        _totalSupply -= rawAmount;
-    }
-
-    /**
-     * @notice Delegate votes from `msg.sender` to `delegatee`
-     * @param delegatee The address to delegate votes to
-     */
+    * @notice Delegate votes from `msg.sender` to `delegatee`
+    * @param delegatee The address to delegate votes to
+    */
     function delegate(address delegatee) public {
         return _delegate(msg.sender, delegatee);
     }
 
     /**
-     * @notice Delegates votes from signatory to `delegatee`
-     * @param delegatee The address to delegate votes to
-     * @param nonce The contract state required to match the signature
-     * @param expiry The time at which to expire the signature
-     * @param v The recovery byte of the signature
-     * @param r Half of the ECDSA signature pair
-     * @param s Half of the ECDSA signature pair
-     */
+    * @notice Delegates votes from signatory to `delegatee`
+    * @param delegatee The address to delegate votes to
+    * @param nonce The contract state required to match the signature
+    * @param expiry The time at which to expire the signature
+    * @param v The recovery byte of the signature
+    * @param r Half of the ECDSA signature pair
+    * @param s Half of the ECDSA signature pair
+    */
     function delegateBySig(
         address delegatee,
         uint256 nonce,
@@ -277,14 +245,14 @@ contract Me3Token is IERC20, Ownable, Me3TokenMinters {
     }
 
     /**
-     * @notice Approves spender to spend on behalf of owner.
-     * @param owner The signer of the permit
-     * @param spender The address to approve
-     * @param deadline The time at which the signature expires
-     * @param v The recovery byte of the signature
-     * @param r Half of the ECDSA signature pair
-     * @param s Half of the ECDSA signature pair
-     */
+    * @notice Approves spender to spend on behalf of owner.
+    * @param owner The signer of the permit
+    * @param spender The address to approve
+    * @param deadline The time at which the signature expires
+    * @param v The recovery byte of the signature
+    * @param r Half of the ECDSA signature pair
+    * @param s Half of the ECDSA signature pair
+    */
     function permit(
         address owner,
         address spender,
@@ -303,22 +271,22 @@ contract Me3Token is IERC20, Ownable, Me3TokenMinters {
     }
 
     /**
-     * @notice Gets the current votes balance for `account`
-     * @param account The address to get votes balance
-     * @return The number of current votes for `account`
-     */
+    * @notice Gets the current votes balance for `account`
+    * @param account The address to get votes balance
+    * @return The number of current votes for `account`
+    */
     function getCurrentVotes(address account) external view returns (uint256) {
         uint32 nCheckpoints = numCheckpoints[account];
         return nCheckpoints > 0 ? checkpoints[account][nCheckpoints - 1].votes : 0;
     }
 
     /**
-     * @notice Determine the prior number of votes for an account as of a block number
-     * @dev Block number must be a finalized block or else this function will revert to prevent misinformation.
-     * @param account The address of the account to check
-     * @param blockNumber The block number to get the vote balance at
-     * @return The number of votes the account had as of the given block
-     */
+    * @notice Determine the prior number of votes for an account as of a block number
+    * @dev Block number must be a finalized block or else this function will revert to prevent misinformation.
+    * @param account The address of the account to check
+    * @param blockNumber The block number to get the vote balance at
+    * @return The number of votes the account had as of the given block
+    */
     function getPriorVotes(address account, uint256 blockNumber) public view returns (uint256) {
         require(blockNumber < block.number, "Me3Token::getPriorVotes: not yet determined");
 
@@ -447,7 +415,7 @@ contract Me3Token is IERC20, Ownable, Me3TokenMinters {
         return a - b;
     }
 
-    function getChainId() internal pure returns (uint256) {
+    function getChainId() internal view returns (uint256) {
         uint256 chainId;
         // solhint-disable no-inline-assembly
         assembly {
@@ -456,38 +424,17 @@ contract Me3Token is IERC20, Ownable, Me3TokenMinters {
         return chainId;
     }
 
-    function getBlackListStatus(address _maker) external view returns (bool) {
-        return isBlackListed[_maker];
-    }
-
-    function addBlackList(address _evilUser) public onlyOwner {
-        isBlackListed[_evilUser] = true;
-        emit AddedBlackList(_evilUser);
-    }
-
-    function removeBlackList(address _clearedUser) public onlyOwner {
-        isBlackListed[_clearedUser] = false;
-        emit RemovedBlackList(_clearedUser);
-    }
-
-    function destroyBlackFunds(address _blackListedUser) public onlyOwner {
-        require(isBlackListed[_blackListedUser]);
-        uint256 dirtyFunds = balanceOf(_blackListedUser);
-        _balances[_blackListedUser] = 0;
-        _totalSupply -= dirtyFunds;
-        emit DestroyedBlackFunds(_blackListedUser, dirtyFunds);
-    }
-
     /** @dev Creates `amount` tokens and assigns them to `account`, increasing
-     * the total supply.
-     *
-     * Emits a {Transfer} event with `from` set to the zero address.
-     *
-     * Requirements
-     *
-     * - `to` cannot be the zero address.
-     */
+    * the total supply.
+    *
+    * Emits a {Transfer} event with `from` set to the zero address.
+    *
+    * Requirements
+    *
+    * - `to` cannot be the zero address.
+    */
     function _mint(address account, uint256 amount) internal virtual {
+        require(totalSupply() + amount <= 1000000000 * (10**_decimals), "Exceeds max supply");
         require(account != address(0), "ERC20: mint to the zero address");
 
         _beforeTokenTransfer(address(0), account, amount);
@@ -496,7 +443,7 @@ contract Me3Token is IERC20, Ownable, Me3TokenMinters {
         _balances[account] = _balances[account] + amount;
 
         _moveDelegates(delegates[address(0)], delegates[account], amount);
-        
+
         emit Transfer(address(0), account, amount);
     }
 
@@ -506,8 +453,9 @@ contract Me3Token is IERC20, Ownable, Me3TokenMinters {
         uint256 amount
     ) internal virtual {}
 
-    function mint(address _to, uint256 _amount) public onlyMinter returns (bool) {
-        _mint(_to, _amount);
-        return true;
-    }
+    // Function removed: mint(address _to, uint256 _amount)
+
+    // Removed the mint function
+
+    // Removed the onlyMinter modifier
 }
