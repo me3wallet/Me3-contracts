@@ -2,13 +2,11 @@
 
 pragma solidity ^0.8.22;
 
-import { Me3TokenMinters } from "./Me3TokenMinters.sol";
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { SafeMath } from "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
+import '@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol';
+import '@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol';
 
-abstract contract Me3Token is IERC20, Ownable, Me3TokenMinters {
-    using SafeMath for uint256;
+abstract contract Me3Token is IERC20 {
 
     /// @notice An event that's emitted when an account changes its delegate
     event DelegateChanged(address indexed delegator, address indexed fromDelegate, address indexed toDelegate);
@@ -439,7 +437,7 @@ abstract contract Me3Token is IERC20, Ownable, Me3TokenMinters {
 
         _beforeTokenTransfer(address(0), account, amount);
 
-        _totalSupply = _totalSupply.add(amount);
+        _totalSupply += amount;
         _balances[account] = _balances[account] + amount;
 
         _moveDelegates(delegates[address(0)], delegates[account], amount);
