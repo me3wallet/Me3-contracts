@@ -6,7 +6,7 @@ import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol';
 import '@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol';
 
-abstract contract Me3Token is IERC20 {
+contract Me3Token is IERC20 {
 
     /// @notice An event that's emitted when an account changes its delegate
     event DelegateChanged(address indexed delegator, address indexed fromDelegate, address indexed toDelegate);
@@ -41,8 +41,6 @@ abstract contract Me3Token is IERC20 {
     /// @notice A record of states for signing / validating signatures
     mapping(address => uint256) public nonces;
 
-    mapping(address => bool) public isBlackListed;
-
     mapping(address => uint256) private _balances;
 
     mapping(address => mapping(address => uint256)) private _allowance;
@@ -64,16 +62,13 @@ abstract contract Me3Token is IERC20 {
     */
     constructor(
         string memory name_,
-        string memory symbol_,
-        uint256 totalSupply_,
- //     address initialOwner,
-        uint256 maxSupply
+        string memory symbol_
+
     ) {
         _name = name_;
         _symbol = symbol_;
-        _totalSupply = totalSupply_;
         _decimals = 18;
-        maxSupply = 1000000000 * (10**_decimals);
+
 
         // Mint tokens to contract deployer with a hard cap of 1,000,000,000
         uint256 initialSupply = 1000000000 * (10**_decimals);
@@ -117,6 +112,10 @@ abstract contract Me3Token is IERC20 {
     */
     function totalSupply() public view virtual override returns (uint256) {
         return _totalSupply;
+    }
+
+    function maxSupply() public view virtual returns (uint256) {
+        return 1000000000 * (10**_decimals);
     }
 
     /**
