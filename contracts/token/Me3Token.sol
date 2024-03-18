@@ -450,9 +450,4 @@ contract Me3Token is IERC20 {
         uint256 amount
     ) internal virtual {}
 
-    // Function removed: mint(address _to, uint256 _amount)
-
-    // Removed the mint function
-
-    // Removed the onlyMinter modifier
 }
